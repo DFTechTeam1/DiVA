@@ -5,8 +5,6 @@ from fastapi.responses import JSONResponse
 
 
 class DiVA(Exception):
-    """Base error exception of Image Search Engine."""
-
     def __init__(
         self,
         detail: str = "Service is unavailable.",
@@ -17,12 +15,7 @@ class DiVA(Exception):
         super().__init__(self.detail, self.name)
 
 
-def create_exception_handler(
-    status_code: int, detail_message: str
-) -> Callable[
-    [Request, DiVA],
-    JSONResponse,
-]:
+def create_exception_handler(status_code: int, detail_message: str) -> Callable[[Request, DiVA], JSONResponse]:
     detail = {"message": detail_message}
 
     async def exception_handler(_: Request, exc: DiVA) -> JSONResponse:

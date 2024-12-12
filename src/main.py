@@ -2,6 +2,8 @@ from src.secret import Config
 from fastapi import FastAPI, status
 from src.routers import health_check
 from fastapi.middleware.cors import CORSMiddleware
+from services.postgres.models import database_migration
+from services.postgres.connection import database_connection
 from starlette.middleware.sessions import SessionMiddleware
 from src.routers.nas_directory_manager import (
     create_directory,
@@ -29,6 +31,15 @@ app = FastAPI(
 )
 
 
+@app.on_event("startup")
+async def startup():
+    await database_migration()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database_connection(connection_type="async").dispose()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -36,10 +47,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(
-    middleware_class=SessionMiddleware,
-    secret_key=config.MIDDLEWARE_SECRET_KEY,
-)
+app.add_middleware(middleware_class=SessionMiddleware, secret_key=config.MIDDLEWARE_SECRET_KEY)
 
 app.include_router(health_check.router)
 app.include_router(create_directory.router)
