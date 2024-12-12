@@ -4,7 +4,7 @@ from src.secret import Config
 config = Config()
 
 app = Celery(
-    main="image-search-engine-bg-tasks",
+    main="diva_bg_task",
     backend=config.PGSQL_BACKEND,
     broker=config.BROKER_URL,
 )

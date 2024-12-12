@@ -9,5 +9,6 @@ if [ ! -f "$CELERY_WORKER" ]; then
 fi
 
 echo "Celery worker found! Processing request..."
-
-celery -A services.celery.worker.app flower --loglevel=INFO
+celery --broker=amqp://development:development@localhost:5672// flower -A diva_monitoring \
+    --basic_auth=development:development \
+    --broker_api=http://development:development@localhost:15672/api/vhost
