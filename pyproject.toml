@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "diva"
 version = "0.1.0"
-description = "DiVA stands for DFactory mage Retrieval, this repository demonstrates a Proof of Concept (PoC) for an advanced Image Search Engine tailored for private datasets. Designed to search and retrieve visually similar images, this project leverages state-of-the-art models to efficiently index and query images."
+description = "DiVA stands for DFactory Image Retrieval, this repository demonstrates a Proof of Concept (PoC) for an advanced Image Search Engine tailored for private datasets. Designed to search and retrieve visually similar images, this project leverages state-of-the-art models to efficiently index and query images."
 authors = ["bastian-arman <putra.armananta@gmail.com>"]
 license = "MIT"
 readme = "README.md"
