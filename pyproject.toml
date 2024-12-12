@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "diva"
+version = "0.1.0"
+description = "DiVA stands for DFactory mage Retrieval, this repository demonstrates a Proof of Concept (PoC) for an advanced Image Search Engine tailored for private datasets. Designed to search and retrieve visually similar images, this project leverages state-of-the-art models to efficiently index and query images."
+authors = ["bastian-arman <putra.armananta@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.6"
+pydantic = "^2.10.3"
+uvicorn = "^0.32.1"
+python-dotenv = "^1.0.1"
+sentence-transformers = "^3.3.1"
+ruff = "^0.8.2"
+pre-commit = "^4.0.1"
+synology-api = "^0.7.3"
+httpx = "^0.28.1"
+sqlmodel = "^0.0.22"
+sqlalchemy = "^2.0.36"
+psycopg2-binary = "^2.9.10"
+psycopg2 = "^2.9.10"
+itsdangerous = "^2.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

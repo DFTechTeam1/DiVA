@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# Function to load environment variables from .env file
+load_env_vars() {
+  if [ -f .env ]; then  # Replace with actual path if necessary
+    while IFS= read -r line; do
+      if [ -n "$line" ] && [ "$(echo "$line" | cut -c1)" != "#" ]; then
+        export "$line"
+      fi
+    done < .env
+  else
+    echo ".env file not found!"
+    exit 1
+  fi
+}
+
+
+# Default host value (local)
+HOST="127.0.0.1"
+
+# Check command-line arguments
+if [ "$1" = "--prod" ]; then
+  echo "Using production environment configuration"
+  load_env_vars
+  if [ -z "$IP_PROD" ]; then
+    echo "IP_PROD not found in .env file! Using default host"
+  else
+    HOST="$IP_PROD"
+  fi
+else
+  # Default to local if no argument or if --local is passed
+  echo "Using local environment configuration"
+fi
+
+
+# Checking for existing processes on port 8000
+echo "Checking for existing processes on port 8000"
+PIDS=$(lsof -ti :8000)
+if [ -n "$PIDS" ]; then
+  echo "Killing existing processes on port 8000"
+  kill -9 $PIDS
+fi
+
+# Checking OS Environment
+echo "Checking OS Environment"
+if grep -qEi "(Microsoft|WSL)" /proc/version &>/dev/null; then
+  echo "WSL detected"
+  . .venv/bin/activate
+else
+  case "$OSTYPE" in
+    linux*)
+      echo "Linux based OS detected"
+      . .venv/bin/activate
+      ;;
+    cygwin* | msys* | mingw*)
+      echo "Windows based OS detected"
+      . .venv/Scripts/activate
+      ;;
+    *)
+      echo "Unsupported OS detected. This feature is not developed yet."
+      exit 1
+      ;;
+  esac
+fi
+
+echo "Running uvicorn server in debug mode"
+uvicorn src.main:app --host "$HOST" --port 8000 --reload --reload-dir=src

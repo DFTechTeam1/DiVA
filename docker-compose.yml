@@ -1,0 +1,64 @@
+services:
+  postgre_sql:
+    container_name: postgre-sql-container
+    image: postgres:16.3-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${LOCAL_POSTGRESQL_USER}
+      - POSTGRES_PASSWORD=${LOCAL_POSTGRESQL_PASSWORD}
+      - POSTGRES_DB=${LOCAL_POSTGRESQL_DATABASE}
+    ports:
+      - 5432:5432
+    volumes:
+      - postgre_sql_data:/var/lib/postgresql/data
+    networks:
+      app_net:
+        ipv4_address: 172.18.0.30
+
+  pg_admin:
+    container_name: pgadmin4-container
+    image: dpage/pgadmin4:8.10
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+      - PGADMIN_LISTEN_PORT=5050
+    ports:
+      - 5050:5050
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin/
+
+    networks:
+      app_net:
+        ipv4_address: 172.18.0.31
+
+  rabbitmq:
+    container_name: rabbitmq-container
+    image: rabbitmq:management-alpine
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_log:/var/log/rabbitmq
+    networks:
+      app_net:
+        ipv4_address: 172.18.0.34
+
+volumes:
+  postgre_sql_data:
+  pgadmin_data:
+  rabbitmq_data:
+  rabbitmq_log:
+
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/16
