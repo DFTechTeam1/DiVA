@@ -3,6 +3,12 @@ from fastapi import FastAPI, status
 from src.routers import health_check
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from src.routers.nas_directory_manager import (
+    create_directory,
+    delete_directory,
+    move_directory,
+    update_directory
+)
 from utils.custom_errors import (
     DiVA,
     NotFoundError,
@@ -17,8 +23,8 @@ config = Config()
 
 app = FastAPI(
     root_path="/api/v1",
-    title="Image Search Engine",
-    description="Backend service for Image Search Engine project.",
+    title="DiVA",
+    description="Backend service for DFactory Image Retrieval.",
     version="1.0.0",
 )
 
@@ -36,6 +42,10 @@ app.add_middleware(
 )
 
 app.include_router(health_check.router)
+app.include_router(create_directory.router)
+app.include_router(update_directory.router)
+app.include_router(delete_directory.router)
+app.include_router(move_directory.router)
 
 app.add_exception_handler(
     exc_class_or_status_code=DiVA,

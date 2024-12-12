@@ -2,10 +2,8 @@ import os
 from utils.logger import logging
 from fastapi import APIRouter, status
 from src.schema.response import ResponseDefault
-from src.schema.request_format import (
-    NasDeleteDirectory,
-)
-from utils.helper import (
+from src.schema.request_format import NasDeleteDirectory
+from utils.nas.path_extractor import (
     login_nas,
     logout_nas,
     check_shared_folder_already_exist,
@@ -15,9 +13,7 @@ from utils.helper import (
 router = APIRouter(tags=["Directory Management"])
 
 
-async def delete_nas_directory(
-    schema: NasDeleteDirectory,
-) -> ResponseDefault:
+async def delete_nas_directory(schema: NasDeleteDirectory) -> ResponseDefault:
     logging.info("Endpoint Delete NAS Directory.")
     response = ResponseDefault()
 

@@ -3,7 +3,7 @@ from utils.logger import logging
 from fastapi import APIRouter, status
 from src.schema.response import ResponseDefault
 from src.schema.request_format import NasDirectoryManagement
-from utils.helper import (
+from utils.nas.path_extractor import (
     login_nas,
     logout_nas,
     check_shared_folder_already_exist,
@@ -13,9 +13,7 @@ from utils.helper import (
 router = APIRouter(tags=["Directory Management"])
 
 
-async def create_nas_directory(
-    schema: NasDirectoryManagement,
-) -> ResponseDefault:
+async def create_nas_directory(schema: NasDirectoryManagement) -> ResponseDefault:
     logging.info("Endpoint Create NAS Directory.")
     response = ResponseDefault()
 
