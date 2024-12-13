@@ -9,7 +9,8 @@ from services.postgres.models import (
     CategoryDataDocumentation,
     ObjectDocumentationDetails,
     EnvironmentDocumentationDetails,
-    DesignTypeDocumentationDetails
+    DesignTypeDocumentationDetails,
+    TimePeriodDocumentationDetails
 )
 
 
@@ -242,4 +243,38 @@ async def insert_design_type_documentation() -> None:
         category="fantasy",
         description="A style rooted in mythical or magical themes. (e.g: high fog image, scary halloween-ish image, etc.)",
     )
+    return None
+
+async def insert_time_period_documentation() -> None:
+    logging.info("Insert time_period details entry.")
+    unique_id = insert_category_documentation(
+        table_model=CategoryDataDocumentation,
+        category="time_period",
+        description="Specifies the context of time in the image.",
+    )
+    insert_details_documentation(
+        table_model=TimePeriodDocumentationDetails,
+        unique_id=unique_id,
+        category="day",
+        description="Scenes illuminated by daylight.",
+    )
+    insert_details_documentation(
+        table_model=TimePeriodDocumentationDetails,
+        unique_id=unique_id,
+        category="afternoon",
+        description="Images depicting the time after noon, with softer lighting.",
+    )
+    insert_details_documentation(
+        table_model=TimePeriodDocumentationDetails,
+        unique_id=unique_id,
+        category="evening",
+        description="Scenes capturing the time before sunset or early night.",
+    )
+    insert_details_documentation(
+        table_model=TimePeriodDocumentationDetails,
+        unique_id=unique_id,
+        category="night",
+        description="Images set in the dark or natural low light.",
+    )
+    
     return None
