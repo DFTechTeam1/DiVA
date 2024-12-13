@@ -21,6 +21,9 @@ httpx = "^0.28.1"
 sqlmodel = "^0.0.22"
 sqlalchemy = "^2.0.36"
 itsdangerous = "^2.2.0"
+asyncpg = "^0.30.0"
+celery = "^5.4.0"
+flower = "^2.0.1"
 
 
 [build-system]

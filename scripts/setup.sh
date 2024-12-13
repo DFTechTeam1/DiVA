@@ -5,8 +5,6 @@ if ! command -v poetry &>/dev/null; then
     echo "Poetry is not installed. Installing Poetry..."
     curl -sSL https://install.python-poetry.org | python3 -
     echo "Poetry installed"
-    echo "Exporting Poetry's PATH..."
-    export PATH="$HOME/.local/bin:$PATH"
 else
     echo "Poetry is already installed."
 fi
