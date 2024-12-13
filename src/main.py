@@ -9,7 +9,7 @@ from src.routers.nas_directory_manager import (
     create_directory,
     delete_directory,
     move_directory,
-    update_directory
+    update_directory,
 )
 from utils.custom_errors import (
     DiVA,
@@ -20,6 +20,8 @@ from utils.custom_errors import (
     AccessUnauthorized,
     create_exception_handler,
 )
+from utils.query.labels_documentation import tes
+
 
 config = Config()
 
@@ -34,11 +36,13 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup():
     await database_migration()
+    print(await tes())
 
 
 @app.on_event("shutdown")
 async def shutdown():
     await database_connection(connection_type="async").dispose()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -47,7 +51,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(middleware_class=SessionMiddleware, secret_key=config.MIDDLEWARE_SECRET_KEY)
+app.add_middleware(
+    middleware_class=SessionMiddleware, secret_key=config.MIDDLEWARE_SECRET_KEY
+)
 
 app.include_router(health_check.router)
 app.include_router(create_directory.router)

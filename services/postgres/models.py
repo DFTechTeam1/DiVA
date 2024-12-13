@@ -45,7 +45,7 @@ class ObjectDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    sub_category: str | None = Field(default=None)
+    category: str | None = Field(default=None)
     description: str | None = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="object_details"
@@ -60,7 +60,7 @@ class EnvironmentDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    sub_category: str | None = Field(default=None)
+    category: str | None = Field(default=None)
     description: str | None = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="environment_details"
@@ -75,7 +75,7 @@ class DesignTypeDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    sub_category: str | None = Field(default=None)
+    category: str | None = Field(default=None)
     description: str | None = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="design_type_details"
@@ -90,7 +90,7 @@ class TimePeriodDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    sub_category: str | None = Field(default=None)
+    category: str | None = Field(default=None)
     description: str | None = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="time_period_details"
@@ -105,7 +105,7 @@ class DominantColorDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    sub_category: str | None = Field(default=None)
+    category: str | None = Field(default=None)
     description: str | None = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="dominant_color_details"
@@ -120,7 +120,7 @@ class CultureStyleDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    sub_category: str | None = Field(default=None)
+    category: str | None = Field(default=None)
     description: str | None = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="culture_style_details"
