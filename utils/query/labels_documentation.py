@@ -11,7 +11,8 @@ from services.postgres.models import (
     EnvironmentDocumentationDetails,
     DesignTypeDocumentationDetails,
     TimePeriodDocumentationDetails,
-    DominantColorDocumentationDetails
+    DominantColorDocumentationDetails,
+    CultureStyleDocumentationDetails
 )
 
 
@@ -311,5 +312,28 @@ async def insert_dominant_colors_documentation() -> None:
         category="gold",
         description="A metallic color often associated with luxury and richness. (e.g: gold.)",
     )
+    
+    return None
+
+async def insert_culture_styles_documentation() -> None:
+    logging.info("Insert culture_styles details entry.")
+    unique_id = insert_category_documentation(
+        table_model=CategoryDataDocumentation,
+        category="culture_styles",
+        description="Highlights the cultural or regional influences evident in the image's style and elements.",
+    )
+    insert_details_documentation(
+        table_model=CultureStyleDocumentationDetails,
+        unique_id=unique_id,
+        category="asian",
+        description="Styles inspired by Asian countries cultures. (e.g: Indonesia, Singapore, Arab, India, Korea, Japan, Chinese, etc.)",
+    )
+    insert_details_documentation(
+        table_model=CultureStyleDocumentationDetails,
+        unique_id=unique_id,
+        category="european",
+        description="Aesthetic styles from European countries, often classical or modern. (e.g: Rome, Italy, etc.)",
+    )
+    
     
     return None
