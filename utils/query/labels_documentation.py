@@ -8,6 +8,7 @@ from sqlalchemy import insert, select
 from services.postgres.models import (
     CategoryDataDocumentation,
     ObjectDocumentationDetails,
+    EnvironmentDocumentationDetails,
 )
 
 
@@ -166,5 +167,33 @@ async def insert_object_documentation() -> None:
         unique_id=unique_id,
         category="living_beings",
         description="Refers to animals or other living creatures present in the image. (e.g: human, couple, and butterfly, etc.)",
+    )
+    return None
+
+
+async def insert_environment_documentation() -> None:
+    logging.info("Insert environment details entry.")
+    unique_id = insert_category_documentation(
+        table_model=CategoryDataDocumentation,
+        category="environment",
+        description="Describes the surrounding setting or background context where the image takes place.",
+    )
+    insert_details_documentation(
+        table_model=EnvironmentDocumentationDetails,
+        unique_id=unique_id,
+        category="natural",
+        description="Outdoor and organic settings. (e.g: gardens, forests, waterfalls, oceans, underwater, flower-ish, etc.)",
+    )
+    insert_details_documentation(
+        table_model=EnvironmentDocumentationDetails,
+        unique_id=unique_id,
+        category="manmade",
+        description="Human-created settings. (e.g: ballrooms, libraries, rustic, glasshouses, etc.)",
+    )
+    insert_details_documentation(
+        table_model=EnvironmentDocumentationDetails,
+        unique_id=unique_id,
+        category="conceptual",
+        description="Imaginative or themed environments. (e.g: galaxy, disney, abstract, gatsby, etc.).",
     )
     return None
