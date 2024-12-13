@@ -20,7 +20,7 @@ from utils.custom_errors import (
     AccessUnauthorized,
     create_exception_handler,
 )
-from utils.query.labels_documentation import tes
+from utils.query.labels_documentation import initialize_labels_documentation
 
 
 config = Config()
@@ -36,7 +36,7 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup():
     await database_migration()
-    print(await tes())
+    await initialize_labels_documentation()
 
 
 @app.on_event("shutdown")
