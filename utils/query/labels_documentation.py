@@ -5,6 +5,10 @@ from sqlmodel.main import SQLModelMetaclass
 from utils.logger import logging
 from utils.helper import local_time
 from sqlalchemy import insert, select
+from services.postgres.models import (
+    CategoryDataDocumentation,
+    ObjectDocumentationDetails,
+)
 
 
 async def validate_data_availability(table_model: SQLModelMetaclass) -> bool:
@@ -135,4 +139,32 @@ async def insert_details_documentation(
         finally:
             await session.close()
 
+    return None
+
+
+async def insert_object_documentation() -> None:
+    logging.info("Insert object details entry.")
+    unique_id = insert_category_documentation(
+        table_model=CategoryDataDocumentation,
+        category="object",
+        description="Represents physical items or elements that are the main focus of an image.",
+    )
+    insert_details_documentation(
+        table_model=ObjectDocumentationDetails,
+        unique_id=unique_id,
+        category="artifacts",
+        description="Man-made items that are often decorative or artistic. (e.g: statues, window, glass, pillars, curtain, fountains, particles, etc.)",
+    )
+    insert_details_documentation(
+        table_model=ObjectDocumentationDetails,
+        unique_id=unique_id,
+        category="nature",
+        description="Natural elements commonly found in outdoor settings. (e.g: mountains, flowers, trees, root, etc.)",
+    )
+    insert_details_documentation(
+        table_model=ObjectDocumentationDetails,
+        unique_id=unique_id,
+        category="living_beings",
+        description="Refers to animals or other living creatures present in the image. (e.g: human, couple, and butterfly, etc.)",
+    )
     return None
