@@ -13,7 +13,7 @@ from src.schema.request_format import (
 )
 from utils.custom_errors import (
     NasIntegrationError,
-    NotFoundError,
+    DataNotFoundError,
     ServicesConnectionError,
 )
 
@@ -166,12 +166,12 @@ async def check_shared_folder_already_exist(
             is_available = validate_shared_directory(data=data, folder_path=folder_path)
 
             if not is_available:
-                raise NotFoundError(
+                raise DataNotFoundError(
                     detail="Shared directory not found. Please please ensure shared directory already created on NAS."
                 )
         except NasIntegrationError:
             raise
-        except NotFoundError:
+        except DataNotFoundError:
             raise
         except Exception as e:
             logging.error(
