@@ -10,7 +10,8 @@ from services.postgres.models import (
     ObjectDocumentationDetails,
     EnvironmentDocumentationDetails,
     DesignTypeDocumentationDetails,
-    TimePeriodDocumentationDetails
+    TimePeriodDocumentationDetails,
+    DominantColorDocumentationDetails
 )
 
 
@@ -275,6 +276,40 @@ async def insert_time_period_documentation() -> None:
         unique_id=unique_id,
         category="night",
         description="Images set in the dark or natural low light.",
+    )
+    
+    return None
+
+async def insert_dominant_colors_documentation() -> None:
+    logging.info("Insert dominant_colors details entry.")
+    unique_id = insert_category_documentation(
+        table_model=CategoryDataDocumentation,
+        category="dominant_colors",
+        description="Showcases the main color scheme or palette that stands out in the image.",
+    )
+    insert_details_documentation(
+        table_model=DominantColorDocumentationDetails,
+        unique_id=unique_id,
+        category="warm",
+        description="Colors that evoke warmth and energy. (e.g: red, yellow, pink, etc.)",
+    )
+    insert_details_documentation(
+        table_model=DominantColorDocumentationDetails,
+        unique_id=unique_id,
+        category="cool",
+        description="Colors that convey calmness and serenity. (e.g: blue, green, purple, etc.)",
+    )
+    insert_details_documentation(
+        table_model=DominantColorDocumentationDetails,
+        unique_id=unique_id,
+        category="neutral",
+        description="Basic colors which are versatile and understated. (e.g: white, gray, and black, etc.)",
+    )
+    insert_details_documentation(
+        table_model=DominantColorDocumentationDetails,
+        unique_id=unique_id,
+        category="gold",
+        description="A metallic color often associated with luxury and richness. (e.g: gold.)",
     )
     
     return None
