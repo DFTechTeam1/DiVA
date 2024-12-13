@@ -9,6 +9,7 @@ from services.postgres.models import (
     CategoryDataDocumentation,
     ObjectDocumentationDetails,
     EnvironmentDocumentationDetails,
+    DesignTypeDocumentationDetails
 )
 
 
@@ -195,5 +196,50 @@ async def insert_environment_documentation() -> None:
         unique_id=unique_id,
         category="conceptual",
         description="Imaginative or themed environments. (e.g: galaxy, disney, abstract, gatsby, etc.).",
+    )
+    return None
+
+async def insert_design_type_documentation() -> None:
+    logging.info("Insert design_type details entry.")
+    unique_id = insert_category_documentation(
+        table_model=CategoryDataDocumentation,
+        category="design_type",
+        description="Refers to the artistic or architectural style depicted in the image, often conveying the overall 'feel' or aesthetic of the scene.",
+    )
+    insert_details_documentation(
+        table_model=DesignTypeDocumentationDetails,
+        unique_id=unique_id,
+        category="art_deco",
+        description="A decorative style characterized by rich and luxury colors. (e.g: awarding image, bold geometry, etc.)",
+    )
+    insert_details_documentation(
+        table_model=DesignTypeDocumentationDetails,
+        unique_id=unique_id,
+        category="heaven",
+        description="A conceptual style depicting divine or ethereal imagery. (e.g: rich of light image, heavenly feel image, etc.)",
+    )
+    insert_details_documentation(
+        table_model=DesignTypeDocumentationDetails,
+        unique_id=unique_id,
+        category="architectural",
+        description="Design elements focusing on buildings or structures. (e.g: churches, chinese house, etc.).",
+    )
+    insert_details_documentation(
+        table_model=DesignTypeDocumentationDetails,
+        unique_id=unique_id,
+        category="artistic",
+        description="Images that emphasize creativity, painting, or artistic interpretation. (e.g: painting image.)",
+    )
+    insert_details_documentation(
+        table_model=DesignTypeDocumentationDetails,
+        unique_id=unique_id,
+        category="sci_fi",
+        description="A futuristic style involving science fiction elements. (e.g: planet-ish image.)",
+    )
+    insert_details_documentation(
+        table_model=DesignTypeDocumentationDetails,
+        unique_id=unique_id,
+        category="fantasy",
+        description="A style rooted in mythical or magical themes. (e.g: high fog image, scary halloween-ish image, etc.)",
     )
     return None
