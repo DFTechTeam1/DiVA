@@ -1,9 +1,6 @@
-import os
 import json
 import httpx
-from pathlib import Path
 from utils.logger import logging
-from datetime import datetime
 from src.secret import Config
 from src.schema.request_format import (
     LoginNasApi,
@@ -87,7 +84,6 @@ async def login_nas(ip_address: str) -> str | None:
         try:
             logging.info("[login_nas] Login into NAS via API.")
             response = await client.get(NAS_BASE_URL, params=params.model_dump())
-            print(response)
             response.raise_for_status()
             data = response.json()
 
@@ -139,7 +135,9 @@ async def logout_nas(ip_address: str) -> None:
     return None
 
 
-async def check_shared_folder_already_exist(connection_id: str, ip_address: str, folder_path: str | list[str]) -> None:
+async def check_shared_folder_already_exist(
+    connection_id: str, ip_address: str, folder_path: str | list[str]
+) -> None:
     params = ListShareNasApi(
         api="SYNO.FileStation.List", version=2, method="list_share", _sid=connection_id
     )
