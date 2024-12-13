@@ -1,6 +1,6 @@
 from uuid import uuid4
 from services.postgres.connection import database_connection
-from utils.custom_errors import DatabaseQueryError
+from utils.custom_errors import DatabaseQueryError, DataNotFoundError
 from sqlmodel.main import SQLModelMetaclass
 from utils.logger import logging
 from utils.helper import local_time
@@ -349,3 +349,79 @@ async def initialize_labels_documentation() -> None:
         await insert_dominant_colors_documentation()
         await insert_culture_styles_documentation()
     return None
+
+async def retrieve_all(table_model: SQLModelMetaclass) -> list:
+    '''This function retrieves all entries from a database table using an asynchronous connection and
+    returns them as a list of dictionaries.
+    
+    Parameters
+    ----------
+    table_model : SQLModelMetaclass
+        The `table_model` parameter in the `retrieve_all` function is expected to be a class that
+    represents a table in a SQL database. It is likely a SQLAlchemy model class that is defined using
+    the `SQLModelMetaclass`. This class would typically have attributes that define the structure of the
+    table,
+    
+    Returns
+    -------
+        The function `retrieve_all` is returning a list of dictionaries where each dictionary represents a
+    row of data retrieved from the database table specified by the `table_model` parameter. Each
+    dictionary contains key-value pairs where the keys are the column names of the table and the values
+    are the corresponding data values for that row.
+    
+    '''
+    async with database_connection(connection_type="async").connect() as session:
+        try:
+            query = select(table_model)
+            result = await session.execute(query)
+            rows = result.fetchall()
+
+            if not rows:
+                logging.error(f"[retrieve_all] No data entry in {table_model.__tablename__}!")
+                raise DataNotFoundError("Data entry not found.")
+            
+            result = [dict(row._mapping) for row in rows]
+
+        except DataNotFoundError:
+            raise
+        except DatabaseQueryError:
+            raise
+        except Exception as e:
+            logging.error(
+                f"[retrieve_all] Error retieving all entry: {e}"
+            )
+            await session.rollback()
+            raise DatabaseQueryError(detail="Invalid database query")
+        finally:
+            await session.close()
+
+    return result
+
+
+async def retrieve_labels_documentation() -> dict:
+    wrapper = {}
+    
+    general = await retrieve_all(table_model=CategoryDataDocumentation)
+    object = await retrieve_all(table_model=ObjectDocumentationDetails)
+    environment = await retrieve_all(table_model=EnvironmentDocumentationDetails)
+    design_type = await retrieve_all(table_model=DesignTypeDocumentationDetails)
+    time_period = await retrieve_all(table_model=TimePeriodDocumentationDetails)
+    dominant_color = await retrieve_all(table_model=DominantColorDocumentationDetails)
+    culture_style = await retrieve_all(table_model=CultureStyleDocumentationDetails)
+
+    for category in general:
+        if category["category"] == "object":
+            category["details"] = object
+        if category["category"] == "environment":
+            category["details"] = environment
+        if category["category"] == "design_type":
+            category["details"] = design_type
+        if category["category"] == "time_period":
+            category["details"] = time_period
+        if category["category"] == "dominant_colors":
+            category["details"] = dominant_color
+        if category["category"] == "culture_styles":
+            category["details"] = culture_style
+    
+    wrapper["documentation"] = general
+    return wrapper

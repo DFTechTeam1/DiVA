@@ -42,7 +42,7 @@ class ServiceError(DiVA):
     pass
 
 
-class NotFoundError(DiVA):
+class DataNotFoundError(DiVA):
     """Error occurred when target data not found."""
 
     pass

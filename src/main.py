@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from services.postgres.models import database_migration
 from services.postgres.connection import database_connection
 from starlette.middleware.sessions import SessionMiddleware
+from utils.query.labels_documentation import initialize_labels_documentation
+from src.routers.classification import labels_documentation
 from src.routers.nas_directory_manager import (
     create_directory,
     delete_directory,
@@ -13,14 +15,13 @@ from src.routers.nas_directory_manager import (
 )
 from utils.custom_errors import (
     DiVA,
-    NotFoundError,
+    DataNotFoundError,
     ServicesConnectionError,
     DatabaseQueryError,
     NasIntegrationError,
     AccessUnauthorized,
     create_exception_handler,
 )
-from utils.query.labels_documentation import initialize_labels_documentation
 
 
 config = Config()
@@ -60,6 +61,7 @@ app.include_router(create_directory.router)
 app.include_router(update_directory.router)
 app.include_router(delete_directory.router)
 app.include_router(move_directory.router)
+app.include_router(labels_documentation.router)
 
 app.add_exception_handler(
     exc_class_or_status_code=DiVA,
@@ -71,7 +73,7 @@ app.add_exception_handler(
 
 
 app.add_exception_handler(
-    exc_class_or_status_code=NotFoundError,
+    exc_class_or_status_code=DataNotFoundError,
     handler=create_exception_handler(
         status_code=status.HTTP_404_NOT_FOUND,
         detail_message="File or data not found.",
