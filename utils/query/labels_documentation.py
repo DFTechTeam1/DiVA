@@ -337,3 +337,15 @@ async def insert_culture_styles_documentation() -> None:
     
     
     return None
+
+async def initialize_labels_documentation() -> None:
+    is_available = validate_data_availability(table_model=CategoryDataDocumentation)
+    if not is_available:
+        logging.info("Initialized labels documentation.")
+        await insert_object_documentation()
+        await insert_environment_documentation()
+        await insert_design_type_documentation()
+        await insert_time_period_documentation()
+        await insert_dominant_colors_documentation()
+        await insert_culture_styles_documentation()
+    return None
