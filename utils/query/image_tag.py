@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from utils.logger import logging
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.schema.request_format import AllowedIpAddress
 from sqlalchemy.orm import sessionmaker
 from utils.custom_errors import DataNotFoundError, DatabaseQueryError
 from services.postgres.models import ImageTag
@@ -37,21 +38,11 @@ def extract_filename(filepaths: list) -> list:
 async def insert_image_tag_entry(
     filepaths: list[str],
     filenames: list[str],
-    allowed_ips: list[str] = [
-        "192.168.100.1",
-        "192.168.100.2",
-        "192.168.100.3",
-        "192.168.100.4",
-        "192.168.100.5",
-        "192.168.100.6",
-        "192.168.100.7",
-        "192.168.100.8",
-        "192.168.100.9",
-        "192.168.100.10",
-    ],
+    allowed_ips: list = None,
 ):
+    allowed_ips = AllowedIpAddress()
     total_entries = len(filenames)
-    total_ips = len(allowed_ips)
+    total_ips = len(allowed_ips.ip_address)
 
     if total_entries < total_ips:
         raise ValueError("Data entry cannot less than allowed ip.")
@@ -62,7 +53,7 @@ async def insert_image_tag_entry(
     distributed_data = []
     start_index = 0
 
-    for idx_ips, ip in enumerate(allowed_ips):
+    for idx_ips, ip in enumerate(allowed_ips.ip_address):
         end_index = start_index + base_count + (1 if idx_ips < remainder else 0)
         entries = [
             ImageTag(
