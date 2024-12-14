@@ -1,10 +1,5 @@
 from typing import Literal
-from pydantic import BaseModel, Extra
-
-
-class CategoryDocumentation(BaseModel):
-    category: str
-    description: str
+from pydantic import BaseModel, Extra, Field
 
 
 class IpAddress(BaseModel):
@@ -33,17 +28,45 @@ class AllowedIpAddress(BaseModel):
 
 
 class NasDirectoryManagement(IpAddress):
-    folder_path: str | list[str]
-    directory_name: str | list[str]
+    folder_path: str | list[str] = None
+    directory_name: str | list[str] = None
 
 
 class NasDeleteDirectory(IpAddress):
-    folder_path: str | list[str]
+    folder_path: str | list[str] = None
 
 
 class NasMoveDirectory(IpAddress):
-    path: str | list[str]
-    dest_folder_path: str | list[str]
+    path: str | list[str] = None
+    dest_folder_path: str | list[str] = None
+
+
+class LabelsValidator(BaseModel):
+    image_id: int = Field(
+        default=None, ge=1, description="Image ID must be greater than or equal to 1"
+    )
+    artifacts: bool = False
+    nature: bool = False
+    living_beings: bool = False
+    natural: bool = False
+    manmade: bool = False
+    conceptual: bool = False
+    art_deco: bool = False
+    heaven: bool = False
+    architectural: bool = False
+    artistic: bool = False
+    sci_fi: bool = False
+    fantasy: bool = False
+    day: bool = False
+    afternoon: bool = False
+    evening: bool = False
+    night: bool = False
+    warm: bool = False
+    cool: bool = False
+    neutral: bool = False
+    gold: bool = False
+    asian: bool = False
+    european: bool = False
 
 
 class SynologyApiPath(BaseModel):
@@ -59,7 +82,7 @@ class SynologyApiPath(BaseModel):
 
 
 class SynologyApiVersion(BaseModel):
-    version: int
+    version: int = None
 
 
 class SynologyMethod(BaseModel):
@@ -92,56 +115,41 @@ class LoginNasApi(
     SynologyMethod,
     SynologyApiSession,
 ):
-    account: str
-    passwd: str
-    format: Literal["cookie"]
+    account: str = None
+    passwd: str = None
+    format: Literal["cookie"] = None
 
 
 class LogoutNasApi(
-    SynologyApiPath,
-    SynologyApiVersion,
-    SynologyMethod,
-    SynologyApiSession,
+    SynologyApiPath, SynologyApiVersion, SynologyMethod, SynologyApiSession
 ):
     pass
 
 
 class ListShareNasApi(
-    SynologyApiPath,
-    SynologyApiVersion,
-    SynologyMethod,
-    NasSidParams,
+    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
 ):
     pass
 
 
 class CreateFolderNasApi(
-    SynologyApiPath,
-    SynologyApiVersion,
-    SynologyMethod,
-    NasSidParams,
+    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
 ):
-    folder_path: str | list[str]
-    name: str | list[str]
+    folder_path: str | list[str] = None
+    name: str | list[str] = None
 
 
 class UpdateFolderNasApi(
-    SynologyApiPath,
-    SynologyApiVersion,
-    SynologyMethod,
-    NasSidParams,
+    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
 ):
-    path: str | list[str]
-    name: str | list[str]
+    path: str | list[str] = None
+    name: str | list[str] = None
 
 
 class DeleteFolderNasApi(
-    SynologyApiPath,
-    SynologyApiVersion,
-    SynologyMethod,
-    NasSidParams,
+    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
 ):
-    path: str | list[str]
+    path: str | list[str] = None
 
 
 class MoveFolderNasApi(
@@ -150,6 +158,6 @@ class MoveFolderNasApi(
     SynologyMethod,
     NasSidParams,
 ):
-    path: str | list[str]
-    dest_folder_path: str | list[str]
+    path: str | list[str] = None
+    dest_folder_path: str | list[str] = None
     remove_src: bool = True

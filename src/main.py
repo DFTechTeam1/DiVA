@@ -7,7 +7,11 @@ from services.postgres.connection import database_connection
 from starlette.middleware.sessions import SessionMiddleware
 from utils.query.labels_documentation import initialize_labels_documentation
 from utils.query.image_tag import initialize_image_tag_preparation
-from src.routers.classification import labels_documentation, pagination
+from src.routers.classification import (
+    labels_documentation,
+    pagination,
+    labels_validator,
+)
 from src.routers.nas_directory_manager import (
     create_directory,
     delete_directory,
@@ -65,6 +69,7 @@ app.include_router(delete_directory.router)
 app.include_router(move_directory.router)
 app.include_router(labels_documentation.router)
 app.include_router(pagination.router)
+app.include_router(labels_validator.router)
 
 app.add_exception_handler(
     exc_class_or_status_code=DiVA,

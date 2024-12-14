@@ -345,7 +345,7 @@ async def initialize_labels_documentation():
         await insert_culture_styles_documentation()
 
 
-async def retrieve_all(table_model: SQLModelMetaclass) -> list:
+async def retrieve_all(table_model: SQLModelMetaclass) -> list | None:
     """This function retrieves all entries from a database table using an asynchronous connection and
     returns them as a list of dictionaries.
 
@@ -377,7 +377,7 @@ async def retrieve_all(table_model: SQLModelMetaclass) -> list:
                 )
                 raise DataNotFoundError("Data entry not found.")
 
-            result = [dict(row._mapping) for row in rows]
+            return [dict(row._mapping) for row in rows]
 
         except DataNotFoundError:
             raise
@@ -390,7 +390,7 @@ async def retrieve_all(table_model: SQLModelMetaclass) -> list:
         finally:
             await session.close()
 
-    return result
+    return None
 
 
 async def retrieve_labels_documentation() -> dict | None:

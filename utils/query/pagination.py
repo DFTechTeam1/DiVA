@@ -8,12 +8,8 @@ from src.schema.response import Pagination
 
 
 async def extract_distributed_entries(
-    page: int, 
-    image_per_page: int, 
-    ip_address: str, 
-    is_validated: bool
+    page: int, image_per_page: int, ip_address: str, is_validated: bool
 ) -> Pagination:
-    
     response = Pagination()
 
     async with database_connection(connection_type="async").connect() as session:
@@ -47,7 +43,7 @@ async def extract_distributed_entries(
             )
             result = await session.execute(total_count_query)
             total_count = result.scalar_one_or_none()
-            
+
             total_page = (total_count + image_per_page - 1) // image_per_page
 
             result = await session.execute(query)
@@ -59,9 +55,9 @@ async def extract_distributed_entries(
 
             response.available_page = total_page
             response.images = result
-            
+
             return response
-        
+
         except DataNotFoundError:
             raise
         except DatabaseQueryError:
