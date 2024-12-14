@@ -14,7 +14,6 @@ load_env_vars() {
   fi
 }
 
-
 # Default host value (local)
 HOST="127.0.0.1"
 
@@ -22,16 +21,17 @@ HOST="127.0.0.1"
 if [ "$1" = "--prod" ]; then
   echo "Using production environment configuration"
   load_env_vars
-  if [ -z "$IP_PROD" ]; then
-    echo "IP_PROD not found in .env file! Using default host"
+  # Get the current IP address
+  CURRENT_IP=$(hostname -I | awk '{print $1}')
+  if [ -z "$CURRENT_IP" ]; then
+    echo "Unable to detect current IP address! Using default host"
   else
-    HOST="$IP_PROD"
+    HOST="$CURRENT_IP"
   fi
 else
   # Default to local if no argument or if --local is passed
   echo "Using local environment configuration"
 fi
-
 
 # Checking for existing processes on port 8000
 echo "Checking for existing processes on port 8000"
