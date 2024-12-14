@@ -53,6 +53,9 @@ async def insert_image_tag_entry(
     total_entries = len(filenames)
     total_ips = len(allowed_ips)
 
+    if total_entries < total_ips:
+        raise ValueError("Data entry cannot less than allowed ip.")
+
     base_count = total_entries // total_ips
     remainder = total_entries % total_ips
 
