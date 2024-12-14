@@ -393,7 +393,7 @@ async def retrieve_all(table_model: SQLModelMetaclass) -> list:
     return result
 
 
-async def retrieve_labels_documentation() -> dict:
+async def retrieve_labels_documentation() -> dict | None:
     wrapper = {}
 
     general = await retrieve_all(table_model=CategoryDataDocumentation)
@@ -404,19 +404,21 @@ async def retrieve_labels_documentation() -> dict:
     dominant_color = await retrieve_all(table_model=DominantColorDocumentationDetails)
     culture_style = await retrieve_all(table_model=CultureStyleDocumentationDetails)
 
-    for category in general:
-        if category["category"] == "object":
-            category["details"] = object
-        if category["category"] == "environment":
-            category["details"] = environment
-        if category["category"] == "design_type":
-            category["details"] = design_type
-        if category["category"] == "time_period":
-            category["details"] = time_period
-        if category["category"] == "dominant_colors":
-            category["details"] = dominant_color
-        if category["category"] == "culture_styles":
-            category["details"] = culture_style
+    if general:
+        for category in general:
+            if category["category"] == "object":
+                category["details"] = object
+            if category["category"] == "environment":
+                category["details"] = environment
+            if category["category"] == "design_type":
+                category["details"] = design_type
+            if category["category"] == "time_period":
+                category["details"] = time_period
+            if category["category"] == "dominant_colors":
+                category["details"] = dominant_color
+            if category["category"] == "culture_styles":
+                category["details"] = culture_style
 
-    wrapper["documentation"] = general
-    return wrapper
+        wrapper["documentation"] = general
+        return wrapper
+    return None

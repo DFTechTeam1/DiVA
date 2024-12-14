@@ -168,7 +168,7 @@ class ImageTag(SQLModel, table=True):
     gold: bool = Field(default=False)
     asian: bool = Field(default=False)
     european: bool = Field(default=False)
-    is_modified: bool = Field(default=False)
+    is_validated: bool = Field(default=False)
     ip_address: str = Field(default=None)
 
 
