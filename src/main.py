@@ -6,6 +6,7 @@ from services.postgres.models import database_migration
 from services.postgres.connection import database_connection
 from starlette.middleware.sessions import SessionMiddleware
 from utils.query.labels_documentation import initialize_labels_documentation
+from utils.query.image_tag import initialize_image_tag_preparation
 from src.routers.classification import labels_documentation
 from src.routers.nas_directory_manager import (
     create_directory,
@@ -38,6 +39,7 @@ app = FastAPI(
 async def startup():
     await database_migration()
     await initialize_labels_documentation()
+    await initialize_image_tag_preparation()
 
 
 @app.on_event("shutdown")

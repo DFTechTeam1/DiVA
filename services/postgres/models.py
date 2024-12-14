@@ -9,8 +9,8 @@ class CategoryDataDocumentation(SQLModel, table=True):
     id: int = Field(primary_key=True)
     created_at: datetime = Field(default=local_time())
     unique_id: str = Field(unique=True)
-    category: str | None = Field(default=None)
-    description: str | None = Field(default=None)
+    category: str = Field(default=None)
+    description: str = Field(default=None)
     object_details: list["ObjectDocumentationDetails"] = Relationship(
         back_populates="information",
         cascade_delete=True,
@@ -45,8 +45,8 @@ class ObjectDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    category: str | None = Field(default=None)
-    description: str | None = Field(default=None)
+    category: str = Field(default=None)
+    description: str = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="object_details"
     )
@@ -60,8 +60,8 @@ class EnvironmentDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    category: str | None = Field(default=None)
-    description: str | None = Field(default=None)
+    category: str = Field(default=None)
+    description: str = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="environment_details"
     )
@@ -75,8 +75,8 @@ class DesignTypeDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    category: str | None = Field(default=None)
-    description: str | None = Field(default=None)
+    category: str = Field(default=None)
+    description: str = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="design_type_details"
     )
@@ -90,8 +90,8 @@ class TimePeriodDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    category: str | None = Field(default=None)
-    description: str | None = Field(default=None)
+    category: str = Field(default=None)
+    description: str = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="time_period_details"
     )
@@ -105,8 +105,8 @@ class DominantColorDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    category: str | None = Field(default=None)
-    description: str | None = Field(default=None)
+    category: str = Field(default=None)
+    description: str = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="dominant_color_details"
     )
@@ -120,8 +120,8 @@ class CultureStyleDocumentationDetails(SQLModel, table=True):
         foreign_key="category_documentation.unique_id",
         ondelete="CASCADE",
     )
-    category: str | None = Field(default=None)
-    description: str | None = Field(default=None)
+    category: str = Field(default=None)
+    description: str = Field(default=None)
     information: CategoryDataDocumentation = Relationship(
         back_populates="culture_style_details"
     )
@@ -131,19 +131,19 @@ class ModelCard(SQLModel, table=True):
     __tablename__ = "model_card"
     id: int = Field(primary_key=True)
     created_at: datetime = Field(default=local_time())
-    updated_at: datetime | None = Field(default=None)
-    started_task_at: datetime | None = Field(default=None)
-    finished_task_at: datetime | None = Field(default=None)
+    updated_at: datetime = Field(default=None)
+    started_task_at: datetime = Field(default=None)
+    finished_task_at: datetime = Field(default=None)
     unique_id: str = Field(unique=True, default=None)
     model_name: str = Field(default=None)
     trained_image: int = Field(default=None)
 
 
-class EnrichKnowledge(SQLModel, table=True):
+class ImageTag(SQLModel, table=True):
     __tablename__ = "image_tag"
     id: int = Field(primary_key=True)
     created_at: datetime = Field(default=local_time())
-    updated_at: datetime | None = Field(default=None)
+    updated_at: datetime = Field(default=None, nullable=True)
     filepath: str = Field(default=None)
     filename: str = Field(default=None)
     nature: bool = Field(default=False)
