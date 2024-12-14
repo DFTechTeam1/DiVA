@@ -1,6 +1,10 @@
-from typing import Union
+from typing import Union, Optional
 from pydantic import BaseModel
 
+
+class Pagination(BaseModel):
+    available_page: int = None
+    images: list = None
 
 class TaskResultState(BaseModel):
     task_id: str = None
@@ -11,4 +15,4 @@ class TaskResultState(BaseModel):
 class ResponseDefault(BaseModel):
     success: bool = True
     message: str = None
-    data: Union[list, str, dict] = None
+    data: Union[list, str, dict, Optional[Pagination]] = None
