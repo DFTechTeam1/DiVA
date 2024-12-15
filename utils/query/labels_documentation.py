@@ -12,7 +12,7 @@ from services.postgres.models import (
     DesignTypeDocumentationDetails,
     TimePeriodDocumentationDetails,
     DominantColorDocumentationDetails,
-    CultureStyleDocumentationDetails
+    CultureStyleDocumentationDetails,
 )
 
 
@@ -100,7 +100,7 @@ async def insert_category_documentation(
 
 async def insert_details_documentation(
     table_model: SQLModelMetaclass, unique_id: str, category: str, description: str
-) -> None:
+):
     """
     This asynchronous function inserts details documentation into a database table using the provided
     parameters.
@@ -144,11 +144,9 @@ async def insert_details_documentation(
         finally:
             await session.close()
 
-    return None
 
-
-async def insert_object_documentation() -> None:
-    logging.info("Insert object details entry.")
+async def insert_object_documentation():
+    logging.info("Insert object detail entries.")
     unique_id = await insert_category_documentation(
         table_model=CategoryDataDocumentation,
         category="object",
@@ -172,11 +170,10 @@ async def insert_object_documentation() -> None:
         category="living_beings",
         description="Refers to animals or other living creatures present in the image. (e.g: human, couple, and butterfly, etc.)",
     )
-    return None
 
 
-async def insert_environment_documentation() -> None:
-    logging.info("Insert environment details entry.")
+async def insert_environment_documentation():
+    logging.info("Insert environment detail entries.")
     unique_id = await insert_category_documentation(
         table_model=CategoryDataDocumentation,
         category="environment",
@@ -200,10 +197,10 @@ async def insert_environment_documentation() -> None:
         category="conceptual",
         description="Imaginative or themed environments. (e.g: galaxy, disney, abstract, gatsby, etc.).",
     )
-    return None
 
-async def insert_design_type_documentation() -> None:
-    logging.info("Insert design_type details entry.")
+
+async def insert_design_type_documentation():
+    logging.info("Insert design_type entries.")
     unique_id = await insert_category_documentation(
         table_model=CategoryDataDocumentation,
         category="design_type",
@@ -245,10 +242,10 @@ async def insert_design_type_documentation() -> None:
         category="fantasy",
         description="A style rooted in mythical or magical themes. (e.g: high fog image, scary halloween-ish image, etc.)",
     )
-    return None
 
-async def insert_time_period_documentation() -> None:
-    logging.info("Insert time_period details entry.")
+
+async def insert_time_period_documentation():
+    logging.info("Insert time_period entries.")
     unique_id = await insert_category_documentation(
         table_model=CategoryDataDocumentation,
         category="time_period",
@@ -278,11 +275,10 @@ async def insert_time_period_documentation() -> None:
         category="night",
         description="Images set in the dark or natural low light.",
     )
-    
-    return None
 
-async def insert_dominant_colors_documentation() -> None:
-    logging.info("Insert dominant_colors details entry.")
+
+async def insert_dominant_colors_documentation():
+    logging.info("Insert dominant_color entries.")
     unique_id = await insert_category_documentation(
         table_model=CategoryDataDocumentation,
         category="dominant_colors",
@@ -312,11 +308,10 @@ async def insert_dominant_colors_documentation() -> None:
         category="gold",
         description="A metallic color often associated with luxury and richness. (e.g: gold.)",
     )
-    
-    return None
 
-async def insert_culture_styles_documentation() -> None:
-    logging.info("Insert culture_styles details entry.")
+
+async def insert_culture_styles_documentation():
+    logging.info("Insert culture_style entries.")
     unique_id = await insert_category_documentation(
         table_model=CategoryDataDocumentation,
         category="culture_styles",
@@ -334,12 +329,12 @@ async def insert_culture_styles_documentation() -> None:
         category="european",
         description="Aesthetic styles from European countries, often classical or modern. (e.g: Rome, Italy, etc.)",
     )
-    
-    
-    return None
 
-async def initialize_labels_documentation() -> None:
-    is_available = await validate_data_availability(table_model=CategoryDataDocumentation)
+
+async def initialize_labels_documentation():
+    is_available = await validate_data_availability(
+        table_model=CategoryDataDocumentation
+    )
     if not is_available:
         logging.info("Initialized labels documentation.")
         await insert_object_documentation()
@@ -348,12 +343,12 @@ async def initialize_labels_documentation() -> None:
         await insert_time_period_documentation()
         await insert_dominant_colors_documentation()
         await insert_culture_styles_documentation()
-    return None
 
-async def retrieve_all(table_model: SQLModelMetaclass) -> list:
-    '''This function retrieves all entries from a database table using an asynchronous connection and
+
+async def retrieve_all(table_model: SQLModelMetaclass) -> list | None:
+    """This function retrieves all entries from a database table using an asynchronous connection and
     returns them as a list of dictionaries.
-    
+
     Parameters
     ----------
     table_model : SQLModelMetaclass
@@ -361,15 +356,15 @@ async def retrieve_all(table_model: SQLModelMetaclass) -> list:
     represents a table in a SQL database. It is likely a SQLAlchemy model class that is defined using
     the `SQLModelMetaclass`. This class would typically have attributes that define the structure of the
     table,
-    
+
     Returns
     -------
         The function `retrieve_all` is returning a list of dictionaries where each dictionary represents a
     row of data retrieved from the database table specified by the `table_model` parameter. Each
     dictionary contains key-value pairs where the keys are the column names of the table and the values
     are the corresponding data values for that row.
-    
-    '''
+
+    """
     async with database_connection(connection_type="async").connect() as session:
         try:
             query = select(table_model)
@@ -377,30 +372,30 @@ async def retrieve_all(table_model: SQLModelMetaclass) -> list:
             rows = result.fetchall()
 
             if not rows:
-                logging.error(f"[retrieve_all] No data entry in {table_model.__tablename__}!")
+                logging.error(
+                    f"[retrieve_all] No data entry in {table_model.__tablename__}!"
+                )
                 raise DataNotFoundError("Data entry not found.")
-            
-            result = [dict(row._mapping) for row in rows]
+
+            return [dict(row._mapping) for row in rows]
 
         except DataNotFoundError:
             raise
         except DatabaseQueryError:
             raise
         except Exception as e:
-            logging.error(
-                f"[retrieve_all] Error retieving all entry: {e}"
-            )
+            logging.error(f"[retrieve_all] Error retieving all entry: {e}")
             await session.rollback()
             raise DatabaseQueryError(detail="Invalid database query")
         finally:
             await session.close()
 
-    return result
+    return None
 
 
-async def retrieve_labels_documentation() -> dict:
+async def retrieve_labels_documentation() -> dict | None:
     wrapper = {}
-    
+
     general = await retrieve_all(table_model=CategoryDataDocumentation)
     object = await retrieve_all(table_model=ObjectDocumentationDetails)
     environment = await retrieve_all(table_model=EnvironmentDocumentationDetails)
@@ -409,19 +404,21 @@ async def retrieve_labels_documentation() -> dict:
     dominant_color = await retrieve_all(table_model=DominantColorDocumentationDetails)
     culture_style = await retrieve_all(table_model=CultureStyleDocumentationDetails)
 
-    for category in general:
-        if category["category"] == "object":
-            category["details"] = object
-        if category["category"] == "environment":
-            category["details"] = environment
-        if category["category"] == "design_type":
-            category["details"] = design_type
-        if category["category"] == "time_period":
-            category["details"] = time_period
-        if category["category"] == "dominant_colors":
-            category["details"] = dominant_color
-        if category["category"] == "culture_styles":
-            category["details"] = culture_style
-    
-    wrapper["documentation"] = general
-    return wrapper
+    if general:
+        for category in general:
+            if category["category"] == "object":
+                category["details"] = object
+            if category["category"] == "environment":
+                category["details"] = environment
+            if category["category"] == "design_type":
+                category["details"] = design_type
+            if category["category"] == "time_period":
+                category["details"] = time_period
+            if category["category"] == "dominant_colors":
+                category["details"] = dominant_color
+            if category["category"] == "culture_styles":
+                category["details"] = culture_style
+
+        wrapper["documentation"] = general
+        return wrapper
+    return None
