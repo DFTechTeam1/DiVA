@@ -1,8 +1,8 @@
+import logging
 from uuid import uuid4
 from services.postgres.connection import database_connection
 from utils.custom_errors import DatabaseQueryError, DataNotFoundError
 from sqlmodel.main import SQLModelMetaclass
-from utils.logger import logging
 from utils.helper import local_time
 from sqlalchemy import insert, select
 from services.postgres.models import (
@@ -367,7 +367,7 @@ async def retrieve_all(table_model: SQLModelMetaclass) -> list | None:
     """
     async with database_connection(connection_type="async").connect() as session:
         try:
-            query = select(table_model)
+            query = select(table_model).order_by(table_model.id)
             result = await session.execute(query)
             rows = result.fetchall()
 

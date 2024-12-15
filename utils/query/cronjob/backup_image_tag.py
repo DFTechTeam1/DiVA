@@ -2,32 +2,12 @@ import sys
 import csv
 import os
 import asyncio
+import logging
 from pathlib import Path
-from sqlalchemy.future import select
 
 sys.path.append(str(Path(__file__).resolve().parents[3]))
 from services.postgres.models import ImageTag
-from services.postgres.connection import database_connection
-
-
-async def retrieve_all() -> list:
-    async with database_connection(connection_type="async").connect() as session:
-        try:
-            query = select(ImageTag).order_by(ImageTag.id)
-            result = await session.execute(query)
-            rows = result.fetchall()
-            if not rows:
-                print(f"[retrieve_all] No data entry in {ImageTag.__tablename__}!")
-                raise ValueError("Data entry not found.")
-            return [dict(row._mapping) for row in rows]
-        except ValueError:
-            raise
-        except Exception as e:
-            print(f"[retrieve_all] Error retieving all entry: {e}")
-            await session.rollback()
-            raise ValueError("Invalid database query")
-        finally:
-            await session.close()
+from utils.query.labels_documentation import retrieve_all
 
 
 async def save_data(data: list) -> None:
@@ -44,11 +24,11 @@ async def save_data(data: list) -> None:
         writer.writeheader()
         writer.writerows(data)
 
-    print(f"Data successfully saved to {filepath}")
+    logging.info(f"Data successfully saved to {filepath}")
 
 
 async def main():
-    data = await retrieve_all()
+    data = await retrieve_all(table_model=ImageTag)
     await save_data(data=data)
 
 
