@@ -13,7 +13,7 @@ from services.postgres.connection import database_connection
 async def retrieve_all() -> list:
     async with database_connection(connection_type="async").connect() as session:
         try:
-            query = select(ImageTag)
+            query = select(ImageTag).order_by(ImageTag.id)
             result = await session.execute(query)
             rows = result.fetchall()
             if not rows:
