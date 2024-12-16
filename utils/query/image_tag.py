@@ -1,38 +1,12 @@
-import os
-from pathlib import Path
 from utils.logger import logging
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.schema.request_format import AllowedIpAddress
-from sqlalchemy.orm import sessionmaker
-from utils.custom_errors import DataNotFoundError, DatabaseQueryError
+from utils.helper import find_image_path, extract_filename
+from utils.custom_errors import DatabaseQueryError
 from services.postgres.models import ImageTag
 from services.postgres.connection import database_connection
 from utils.query.labels_documentation import validate_data_availability
-
-
-def find_image_path() -> list:
-    default_path = Path("/project_utils/diva/client_preview")
-    if not os.path.exists(path=default_path):
-        raise DataNotFoundError(
-            detail="Directory not found! Please make sure you already mount directory."
-        )
-
-    image_extensions = {".jpg", ".jpeg", ".png"}
-    image_paths = [
-        str(path)
-        for path in Path(default_path).rglob("*")
-        if path.suffix.lower() in image_extensions
-    ]
-
-    if not image_paths:
-        logging.error(f"[find_image_path] No image files found in {default_path}")
-        raise DataNotFoundError(detail="No image found!")
-
-    return image_paths
-
-
-def extract_filename(filepaths: list) -> list:
-    return [filename.split("/")[-1] for filename in filepaths]
 
 
 async def insert_image_tag_entry(
