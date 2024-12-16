@@ -24,6 +24,7 @@ async def labels_validator(
 
     await update_labels(
         image_id=schema.image_id,
+        ip_address=ip_address,
         artifacts=schema.artifacts,
         nature=schema.nature,
         living_beings=schema.living_beings,

@@ -7,6 +7,7 @@ from utils.logger import logging
 
 async def update_labels(
     image_id: int,
+    ip_address: str,
     artifacts: bool = False,
     nature: bool = False,
     living_beings: bool = False,
@@ -56,21 +57,16 @@ async def update_labels(
                 "is_validated": True,
             }
 
-            # Construct the update query
             query = (
                 update(ImageTag)
-                .where(ImageTag.id == image_id)
+                .where(ImageTag.id == image_id, ImageTag.ip_address == ip_address)
                 .values(update_values)
-                .returning(
-                    *ImageTag.__table__.columns
-                )  # Return all columns after update
+                .returning(*ImageTag.__table__.columns)
             )
 
-            # Execute the query
             result = await session.execute(query)
-            await session.commit()  # Commit the transaction
+            await session.commit()
 
-            # Fetch the updated row
             row = result.fetchone()
 
             if not row:
