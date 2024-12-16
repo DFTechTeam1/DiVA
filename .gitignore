@@ -170,3 +170,4 @@ cython_debug/
 .vscode
 /result*
 tes.py
+/models/*
