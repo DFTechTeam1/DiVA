@@ -27,3 +27,31 @@ async def test_find_image_paths_with_valid_directory_but_no_images_data() -> Non
     fixed_path = os.path.join(full_path, random_path)
     with pytest.raises(DataNotFoundError, match="No image found!"):
         await find_image_path(image_path=fixed_path)
+
+
+@pytest.mark.asyncio
+async def test_find_image_with_valid_directory_and_available_images() -> None:
+    """Should return list of absolute image paths in directory."""
+    image_paths = find_image_path()
+    total_image_files = [
+        file
+        for root, dirs, files in os.walk("/project_utils/diva/client_preview")
+        for file in files
+        if file.lower().endswith(("jpeg", "jpg", "png"))
+    ]
+    assert type(image_paths) is list
+    assert len(image_paths) == len(total_image_files)
+
+
+@pytest.mark.asyncio
+async def test_find_image_with_mixed_file_and_valid_directory() -> None:
+    """Should only return list of image files, excluding other files."""
+    image_paths = find_image_path(image_path="images")
+    total_image_files = [
+        file
+        for root, dirs, files in os.walk("images")
+        for file in files
+        if file.lower().endswith(("jpeg", "jpg", "png"))
+    ]
+    assert type(image_paths) is list
+    assert len(image_paths) == len(total_image_files)
