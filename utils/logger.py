@@ -9,6 +9,6 @@ logging.basicConfig(
     datefmt=DATE_FORMAT,
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(filename="server.log"),
+        logging.FileHandler(filename="logs/server.log"),
     ],
 )
