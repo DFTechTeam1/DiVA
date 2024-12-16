@@ -11,7 +11,7 @@ from utils.query.labels_documentation import retrieve_all
 
 
 async def save_data(data: list) -> None:
-    default_path = Path("/project-utils/backup")
+    default_path = Path("/project_utils/diva/backup")
     default_path.mkdir(parents=True, exist_ok=True)
 
     filename = "backup_image_tag.csv"

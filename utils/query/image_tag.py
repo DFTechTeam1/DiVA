@@ -11,7 +11,7 @@ from utils.query.labels_documentation import validate_data_availability
 
 
 def find_image_path() -> list:
-    default_path = Path("/project-utils/client_preview")
+    default_path = Path("/project_utils/diva/client_preview")
     if not os.path.exists(path=default_path):
         raise DataNotFoundError(
             detail="Directory not found! Please make sure you already mount directory."
