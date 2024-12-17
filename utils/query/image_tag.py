@@ -50,10 +50,12 @@ async def insert_image_tag_entry(
             session.add_all(distributed_data)
             await session.commit()
             logging.info("Insert image_tag entries.")
+        except DatabaseQueryError:
+            raise
         except Exception as e:
             logging.error(f"[insert_image_tag_entry] Error inserting data: {e}")
             await session.rollback()
-            raise DatabaseQueryError(detail="Database query failed")
+            raise DatabaseQueryError(detail="Database query failed.")
         finally:
             await session.close()
 
