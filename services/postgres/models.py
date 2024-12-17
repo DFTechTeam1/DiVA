@@ -137,6 +137,7 @@ class ModelCard(SQLModel, table=True):
     finished_task_at: datetime = Field(default=None)
     unique_id: str = Field(unique=True, default=None)
     model_name: str = Field(default=None)
+    model_path: str = Field(default=None)
     model_type: ModelType = Field(default=None)
     trained_image: int = Field(default=None)
     model_details: list["ModelAccuracy"] = Relationship(
