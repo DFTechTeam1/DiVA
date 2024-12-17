@@ -73,7 +73,7 @@ async def update_labels(
                 logging.error(
                     f"[update_labels] No entry found for ImageTag with ID: {image_id}"
                 )
-                raise DataNotFoundError(detail="Data entry not found")
+                raise DataNotFoundError(detail="Data entry not found.")
 
         except DataNotFoundError:
             raise

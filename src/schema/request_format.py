@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Literal
 from pydantic import BaseModel, Extra, Field
 
@@ -161,3 +162,8 @@ class MoveFolderNasApi(
     path: str | list[str] = None
     dest_folder_path: str | list[str] = None
     remove_src: bool = True
+
+
+class ModelType(StrEnum):
+    classification: str = "classification"
+    query: str = "query"
