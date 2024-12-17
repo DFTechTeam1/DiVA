@@ -3,9 +3,9 @@ import asyncio
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[3]))
-from utils.query.cronjob.backup import save_data
+from utils.query.cronjob.general import save_data
 from services.postgres.models import ImageTag
-from utils.query.labels_documentation import retrieve_all
+from utils.query.general import retrieve_all
 
 
 async def backup_image_tag():

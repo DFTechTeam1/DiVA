@@ -1,10 +1,11 @@
 import logging
+from sqlalchemy import insert
 from uuid import uuid4
 from services.postgres.connection import database_connection
-from utils.custom_errors import DatabaseQueryError, DataNotFoundError
+from utils.custom_errors import DatabaseQueryError
 from sqlmodel.main import SQLModelMetaclass
 from utils.helper import local_time
-from sqlalchemy import insert, select
+from utils.query.general import retrieve_all, validate_data_availability
 from services.postgres.models import (
     CategoryDataDocumentation,
     ObjectDocumentationDetails,
@@ -14,40 +15,6 @@ from services.postgres.models import (
     DominantColorDocumentationDetails,
     CultureStyleDocumentationDetails,
 )
-
-
-async def validate_data_availability(table_model: SQLModelMetaclass) -> bool:
-    """
-    This Python async function validates the availability of data in a database table using an
-    SQLModelMetaclass object.
-
-    :param table_model: The `table_model` parameter in the `validate_data_availability` function is
-    expected to be a SQLAlchemy model class that represents a table in the database. This class should
-    be a subclass of `SQLModelMetaclass`, which is likely a custom metaclass for SQLAlchemy models in
-    your codebase. The
-    :type table_model: SQLModelMetaclass
-    :return: The function `validate_data_availability` returns a boolean value indicating whether the
-    data represented by the `table_model` exists in the database. If the data exists, it returns `True`,
-    otherwise it returns `False`.
-    """
-    async with database_connection(connection_type="async").connect() as session:
-        try:
-            query = select(select(table_model).exists())
-            result = await session.execute(query)
-            return result.scalar()
-
-        except DatabaseQueryError:
-            raise
-        except Exception as e:
-            logging.error(
-                f"[validate_data_availability] Error while validating data availability: {e}"
-            )
-            await session.rollback()
-            raise DatabaseQueryError(detail="Invalid database query")
-        finally:
-            await session.close()
-
-    return False
 
 
 async def insert_category_documentation(
@@ -343,54 +310,6 @@ async def initialize_labels_documentation():
         await insert_time_period_documentation()
         await insert_dominant_colors_documentation()
         await insert_culture_styles_documentation()
-
-
-async def retrieve_all(table_model: SQLModelMetaclass) -> list | None:
-    """This function retrieves all entries from a database table using an asynchronous connection and
-    returns them as a list of dictionaries.
-
-    Parameters
-    ----------
-    table_model : SQLModelMetaclass
-        The `table_model` parameter in the `retrieve_all` function is expected to be a class that
-    represents a table in a SQL database. It is likely a SQLAlchemy model class that is defined using
-    the `SQLModelMetaclass`. This class would typically have attributes that define the structure of the
-    table,
-
-    Returns
-    -------
-        The function `retrieve_all` is returning a list of dictionaries where each dictionary represents a
-    row of data retrieved from the database table specified by the `table_model` parameter. Each
-    dictionary contains key-value pairs where the keys are the column names of the table and the values
-    are the corresponding data values for that row.
-
-    """
-    async with database_connection(connection_type="async").connect() as session:
-        try:
-            query = select(table_model).order_by(table_model.id)
-            result = await session.execute(query)
-            rows = result.fetchall()
-
-            if not rows:
-                logging.error(
-                    f"[retrieve_all] No data entry in table {table_model.__tablename__}!"
-                )
-                raise DataNotFoundError("Data entry not found.")
-
-            return [dict(row._mapping) for row in rows]
-
-        except DataNotFoundError:
-            raise
-        except DatabaseQueryError:
-            raise
-        except Exception as e:
-            logging.error(f"[retrieve_all] Error retieving all entry: {e}")
-            await session.rollback()
-            raise DatabaseQueryError(detail="Invalid database query")
-        finally:
-            await session.close()
-
-    return None
 
 
 async def retrieve_labels_documentation() -> dict | None:
