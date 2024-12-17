@@ -373,7 +373,7 @@ async def retrieve_all(table_model: SQLModelMetaclass) -> list | None:
 
             if not rows:
                 logging.error(
-                    f"[retrieve_all] No data entry in {table_model.__tablename__}!"
+                    f"[retrieve_all] No data entry in table {table_model.__tablename__}!"
                 )
                 raise DataNotFoundError("Data entry not found.")
 
