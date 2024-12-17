@@ -29,7 +29,7 @@ async def update_labels(
     gold: bool = False,
     asian: bool = False,
     european: bool = False,
-) -> dict | None:
+) -> dict:
     async with database_connection(connection_type="async").connect() as session:
         try:
             update_values = {
@@ -85,4 +85,3 @@ async def update_labels(
             raise DatabaseQueryError(detail="Invalid database query")
         finally:
             await session.close()
-    return None

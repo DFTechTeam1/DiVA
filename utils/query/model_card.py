@@ -77,7 +77,7 @@ async def insert_classification_model_card(
 
 async def extract_models_card_entry(
     model_type: Literal["classification", "query"],
-) -> Row | None:
+) -> Row:
     """
     The above functions handle extracting and updating model card entries in a database asynchronously.
 
@@ -109,7 +109,6 @@ async def extract_models_card_entry(
             raise DatabaseQueryError(detail="Database query failed.")
         finally:
             await session.close()
-    return None
 
 
 async def update_model_card_entry(

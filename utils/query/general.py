@@ -5,7 +5,7 @@ from sqlmodel.main import SQLModelMetaclass
 from sqlalchemy import select
 
 
-async def retrieve_all(table_model: SQLModelMetaclass) -> list | None:
+async def retrieve_all(table_model: SQLModelMetaclass) -> list:
     """This function retrieves all entries from a database table using an asynchronous connection and
     returns them as a list of dictionaries.
 
@@ -49,8 +49,6 @@ async def retrieve_all(table_model: SQLModelMetaclass) -> list | None:
             raise DatabaseQueryError(detail="Invalid database query")
         finally:
             await session.close()
-
-    return None
 
 
 async def validate_data_availability(table_model: SQLModelMetaclass) -> bool:
