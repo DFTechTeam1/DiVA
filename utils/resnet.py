@@ -37,6 +37,7 @@ class MultiLabelDataset(Dataset):
         df = pd.read_csv(filepath_or_buffer=dataset_path, delimiter=",")
         df = df.iloc[:30]
         labels = df.iloc[:, 5:-2].values
+        print(labels)
 
         self.labels = labels
 

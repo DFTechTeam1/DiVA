@@ -14,6 +14,7 @@ async def insert_classification_model_card(
     finished_task_at: datetime,
     model_type: Literal["classification", "query"],
     model_name: str,
+    model_path: str,
     trained_image: int,
     unique_id: str,
 ) -> None:
@@ -54,6 +55,7 @@ async def insert_classification_model_card(
                 started_task_at=started_task_at,
                 finished_task_at=finished_task_at,
                 unique_id=unique_id,
+                model_path=model_path,
                 model_name=model_name,
                 model_type=model_type,
                 trained_image=trained_image,
@@ -94,8 +96,6 @@ async def extract_models_card_entry(
             query = select(ModelCard).where(ModelCard.model_type == model_type)
             result = await session.execute(query)
             entry = result.fetchone()
-            if not entry:
-                raise DataNotFoundError(f"Model entry {model_type} not found!")
             return entry
         except DataNotFoundError:
             raise

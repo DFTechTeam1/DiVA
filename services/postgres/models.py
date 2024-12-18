@@ -132,7 +132,7 @@ class ModelCard(SQLModel, table=True):
     __tablename__ = "model_card"
     id: int = Field(primary_key=True)
     created_at: datetime = Field(default=local_time())
-    updated_at: datetime = Field(default=None)
+    updated_at: datetime | None = Field(default=None)
     started_task_at: datetime = Field(default=None)
     finished_task_at: datetime = Field(default=None)
     unique_id: str = Field(unique=True, default=None)
@@ -153,7 +153,7 @@ class ModelAccuracy(SQLModel, table=True):
         foreign_key="model_card.unique_id",
         ondelete="CASCADE",
     )
-    test_accuracy: int = Field(default=None)
+    test_accuracy: float = Field(default=None)
     information: ModelCard = Relationship(back_populates="model_details")
 
 

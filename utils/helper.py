@@ -2,6 +2,7 @@ import os
 import string
 import random
 from pathlib import Path
+from collections import defaultdict
 from datetime import datetime
 from utils.logger import logging
 from utils.custom_errors import DataNotFoundError
@@ -86,3 +87,29 @@ def generate_random_word(length: int = 4) -> str:
     word = "".join(random.choice(alphabet) for _ in range(length))
 
     return word
+
+
+def label_distribution(entries: list) -> None:
+    label_counts = defaultdict(lambda: {"true": 0, "false": 0})
+
+    for entry in entries:
+        for label, value in entry.items():
+            if isinstance(value, bool) and label not in {"is_validated"}:
+                if value:
+                    label_counts[label]["true"] += 1
+                else:
+                    label_counts[label]["false"] += 1
+
+    total_entries = len(entries)
+    label_percentages = {
+        label: {
+            "true": (counts["true"] / total_entries) * 100,
+            "false": (counts["false"] / total_entries) * 100,
+        }
+        for label, counts in label_counts.items()
+    }
+
+    for label, percentages in label_percentages.items():
+        logging.info(
+            f"{label}: True = {percentages['true']:.2f}%, False = {percentages['false']:.2f}%"
+        )

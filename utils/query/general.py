@@ -37,6 +37,9 @@ async def retrieve_all(table_model: SQLModelMetaclass) -> list:
                 )
                 raise DataNotFoundError("Data entry not found.")
 
+            logging.info(
+                f"[table_model] Retrieve all data {table_model.__tablename__}."
+            )
             return [dict(row._mapping) for row in rows]
 
         except DataNotFoundError:

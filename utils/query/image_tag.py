@@ -70,6 +70,12 @@ async def initialize_image_tag_preparation():
 
 
 async def extract_validated_image_tag() -> list:
+    """
+    This Python async function extracts and returns validated image tags from a database connection.
+    :return: A list of dictionaries containing the attributes of validated ImageTag entries is being
+    returned. Each dictionary represents a row in the database table, with the keys being the column
+    names and the values being the corresponding data for that row.
+    """
     async with database_connection(connection_type="async").connect() as session:
         try:
             query = (
@@ -82,7 +88,7 @@ async def extract_validated_image_tag() -> list:
             if not rows:
                 logging.error("[extract_validated_image_tag] No validated data entry!")
                 raise DataNotFoundError("Validated data entry not found.")
-
+            logging.info(f"[table_model] Retrieve all data {ImageTag.__tablename__}.")
             return [dict(row._mapping) for row in rows]
         except DataNotFoundError:
             raise
