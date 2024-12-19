@@ -1,33 +1,28 @@
-import asyncio
 import os
-import numpy as np
 import torch
+import numpy as np
 from uuid import uuid4
-from datetime import datetime
-from utils.query.image_tag import extract_validated_image_tag
-from utils.helper import label_distribution
-from utils.resnet.custom_model import CustomDataLoader, CustomResNet50Classifier
-from utils.logger import logging
-from petname import generate
+from torch import optim
 from pathlib import Path
+from typing import Literal
+from petname import generate
+from datetime import datetime
 from torch.optim import Adam
+from utils.logger import logging
 from torch.utils.data import DataLoader
 from torch.nn import BCEWithLogitsLoss
-from typing import Literal
-from torch import optim
-from utils.query.model_card import insert_classification_model_card
 from utils.query.model_accuracy import insert_test_accuracy
+from utils.helper import label_distribution
+from utils.resnet.custom_model import CustomDataLoader, CustomResNet50Classifier
+from utils.query.image_tag import extract_image_tag_entries, update_image_tag_is_trained
+from utils.query.model_card import (
+    insert_classification_model_card,
+    extract_models_card_entry,
+    update_model_card_entry,
+)
 
 
-async def data_loader(dataset: CustomDataLoader) -> CustomDataLoader:
-    loop = asyncio.get_event_loop()
-    dataloader = await loop.run_in_executor(
-        None, lambda: DataLoader(dataset=dataset, shuffle=True)
-    )
-    return dataloader
-
-
-async def save_model(model: CustomResNet50Classifier, model_name: str) -> str:
+def save_model(model: CustomResNet50Classifier, model_name: str) -> str:
     model_directory = Path("/home/dfactory/Project/DiVA/models")
 
     if not os.path.exists(path=model_directory):
@@ -42,8 +37,9 @@ async def save_model(model: CustomResNet50Classifier, model_name: str) -> str:
     return str(model_path)
 
 
-async def training_resnet(
-    device: Literal["cpu", "gpu"],
+def train_validate_resnet(
+    device: Literal["cpu", "cuda"],
+    dataset: CustomDataLoader,
     dataloader: DataLoader,
     model: CustomResNet50Classifier,
     epochs: int,
@@ -63,19 +59,6 @@ async def training_resnet(
             optimizer.step()
             train_loss.append(loss.item())
 
-        logging.info(f"Epoch {epoch+1}, train loss {np.mean(train_loss)}")
-
-    return model
-
-
-async def validating_resnet(
-    device: Literal["cpu", "gpu"],
-    dataset: CustomDataLoader,
-    dataloader: DataLoader,
-    model: CustomResNet50Classifier,
-    epochs: int,
-) -> None:
-    for epoch in range(epochs):
         val_loss = []
         dataset.mode = "valid"
         model.eval()
@@ -88,11 +71,24 @@ async def validating_resnet(
                 loss = torch.sum(error(y_hat, labels))
                 val_loss.append(loss.item())
 
-        logging.info(f"Epoch {epoch+1}, validation loss {np.mean(val_loss)}")
+        logging.info(
+            f"Epoch {epoch+1}\t train loss {np.mean(train_loss):.4}\t validation loss {np.mean(val_loss):.4}"
+        )
+
+    return model
 
 
-async def predicting_resnet(
-    device: Literal["cpu", "gpu"],
+def load_resnet(
+    num_labels: int, model_path: str, device: Literal["cuda", "gpu"]
+) -> CustomResNet50Classifier:
+    loaded_model = CustomResNet50Classifier(num_labels=num_labels)
+    loaded_model.load_state_dict(torch.load(model_path, weights_only=True))
+    loaded_model = loaded_model.to(device)
+    return loaded_model.eval()
+
+
+def predicting_resnet(
+    device: Literal["cpu", "cuda"],
     dataset: CustomDataLoader,
     dataloader: DataLoader,
     model: CustomResNet50Classifier,
@@ -119,7 +115,7 @@ async def predicting_resnet(
     return float(f"{test_accuracy:.2f}")
 
 
-async def custom_resnet50_trainer(epochs: int = 100):
+def custom_resnet50_trainer(epochs: int = 250) -> None:
     model_name = generate()
     model_path = f"/home/dfactory/Project/DiVA/models/{model_name}.pth"
 
@@ -132,53 +128,122 @@ async def custom_resnet50_trainer(epochs: int = 100):
     unique_id = str(uuid4())
 
     # Data preparation
-    entries = await extract_validated_image_tag()
-    label_distribution(entries=entries)
-    dataset = CustomDataLoader(entries=entries)
-    dataset.splitter()
-    labels = dataset.label_details()
+    entries = extract_image_tag_entries()
+    if not entries:
+        logging.info("[custom_resnet50_trainer] Skip training.")
+    elif len(entries) < 10:
+        logging.info(
+            "[custom_resnet50_trainer] Skip training. Image threshold not satisfied."
+        )
+    else:
+        label_distribution(entries=entries)
+        dataset = CustomDataLoader(entries=entries)
+        dataset.splitter()
+        labels = dataset.label_details()
 
-    # Prepare dataloaders
-    dataloader = await data_loader(dataset=dataset)
+        # Prepare dataloaders
+        dataloader = DataLoader(dataset=dataset, shuffle=True)
 
-    # Initialize model
-    model = CustomResNet50Classifier(num_labels=labels)
-    model = model.to(device=device)
-    optimizer = Adam(params=model.parameters(), lr=1e-9)
+        # Initialize model
+        model = CustomResNet50Classifier(num_labels=labels)
+        model = model.to(device=device)
+        optimizer = Adam(params=model.parameters(), lr=1e-5)
 
-    # Training, Validation, and Testing (async)
-    trained_model = await training_resnet(
-        device=device,
-        dataloader=dataloader,
-        model=model,
-        epochs=epochs,
-        optimizer=optimizer,
-    )
-    await validating_resnet(
-        device=device,
-        dataset=dataset,
-        dataloader=dataloader,
-        model=trained_model,
-        epochs=epochs,
-    )
-    test_accuracy = await predicting_resnet(
-        device=device, dataset=dataset, dataloader=dataloader, model=trained_model
-    )
+        # Training, Validation, and Testing (async)
+        trained_model = train_validate_resnet(
+            dataset=dataset,
+            device=device,
+            dataloader=dataloader,
+            model=model,
+            epochs=epochs,
+            optimizer=optimizer,
+        )
 
-    # Saving model into local project directory
-    model_path = await save_model(model=trained_model, model_name=model_name)
+        test_accuracy = predicting_resnet(
+            device=device, dataset=dataset, dataloader=dataloader, model=trained_model
+        )
 
-    # Finished task
-    finished_task_at = datetime.now()
+        # Saving model into local project directory
+        model_path = save_model(model=trained_model, model_name=model_name)
 
-    await insert_classification_model_card(
-        started_task_at=started_task_at,
-        finished_task_at=finished_task_at,
-        unique_id=unique_id,
-        model_type="classification",
-        model_name=model_name,
-        model_path=model_path,
-        trained_image=dataset.train_size,
-    )
+        # Finished task
+        finished_task_at = datetime.now()
 
-    await insert_test_accuracy(unique_id=unique_id, test_accuracy=test_accuracy)
+        insert_classification_model_card(
+            started_task_at=started_task_at,
+            finished_task_at=finished_task_at,
+            unique_id=unique_id,
+            model_type="classification",
+            model_name=model_name,
+            model_path=model_path,
+            trained_image=dataset.train_size,
+        )
+
+        insert_test_accuracy(unique_id=unique_id, test_accuracy=test_accuracy)
+        update_image_tag_is_trained(entries=entries)
+
+
+def custom_resnet50_fine_tuner(epochs: int = 250) -> None:
+    cls_model = extract_models_card_entry(model_type="classification")
+    entries = extract_image_tag_entries()
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    if not entries:
+        logging.info("[custom_resnet50_fine_tuner] No updated validated data.")
+    elif len(entries) < 10:
+        logging.info(
+            "[custom_resnet50_fine_tuner] Skip fine tuning. Image threshold not satisfied."
+        )
+    else:
+        logging.info(
+            f"[custom_resnet50_fine_tuner] Found new {len(entries)} images. Proceed fine tuning phase."
+        )
+        # Start task
+        started_task_at = datetime.now()
+
+        # Data preparation
+        label_distribution(entries=entries)
+        dataset = CustomDataLoader(entries=entries)
+        dataset.splitter()
+        labels = dataset.label_details()
+        trained_image = dataset.train_size + cls_model.trained_image
+
+        # Prepare dataloaders
+        dataloader = DataLoader(dataset=dataset, shuffle=True)
+
+        # Load resnet model
+        model = load_resnet(
+            num_labels=labels, model_path=cls_model.model_path, device=device
+        )
+        optimizer = Adam(params=model.parameters(), lr=1e-5)
+
+        # Training, Validation, and Testing (async)
+        trained_model = train_validate_resnet(
+            dataset=dataset,
+            device=device,
+            dataloader=dataloader,
+            model=model,
+            epochs=epochs,
+            optimizer=optimizer,
+        )
+
+        test_accuracy = predicting_resnet(
+            device=device, dataset=dataset, dataloader=dataloader, model=trained_model
+        )
+
+        # Updating model into local project directory
+        save_model(model=trained_model, model_name=cls_model.model_name)
+
+        # Finished task
+        finished_task_at = datetime.now()
+
+        logging.info("[custom_resnet50_fine_tuner] Updating model card.")
+        update_model_card_entry(
+            started_task_at=started_task_at,
+            finished_task_at=finished_task_at,
+            model_type="classification",
+            trained_image=trained_image,
+        )
+
+        insert_test_accuracy(unique_id=cls_model.unique_id, test_accuracy=test_accuracy)
+        update_image_tag_is_trained(entries=entries)
+    return None

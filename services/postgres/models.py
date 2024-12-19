@@ -187,6 +187,7 @@ class ImageTag(SQLModel, table=True):
     asian: bool = Field(default=False)
     european: bool = Field(default=False)
     is_validated: bool = Field(default=False)
+    is_trained: bool = Field(default=False)
     ip_address: str = Field(default=None)
 
 

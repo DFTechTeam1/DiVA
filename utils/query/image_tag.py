@@ -1,5 +1,5 @@
 from utils.logger import logging
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.schema.request_format import AllowedIpAddress
@@ -69,26 +69,26 @@ async def initialize_image_tag_preparation():
         await insert_image_tag_entry(filepaths=filepaths, filenames=filenames)
 
 
-async def extract_validated_image_tag() -> list:
-    """
-    This Python async function extracts and returns validated image tags from a database connection.
-    :return: A list of dictionaries containing the attributes of validated ImageTag entries is being
-    returned. Each dictionary represents a row in the database table, with the keys being the column
-    names and the values being the corresponding data for that row.
-    """
-    async with database_connection(connection_type="async").connect() as session:
+def extract_image_tag_entries(
+    is_validated: bool = True, is_trained: bool = False
+) -> list:
+    with database_connection().connect() as session:
         try:
             query = (
                 select(ImageTag)
-                .where(ImageTag.is_validated is True)
+                .where(
+                    ImageTag.is_validated == is_validated,
+                    ImageTag.is_trained == is_trained,
+                )
                 .order_by(ImageTag.id)
             )
-            execute = await session.execute(query)
+            execute = session.execute(query)
             rows = execute.fetchall()
             if not rows:
-                logging.error("[extract_validated_image_tag] No validated data entry!")
-                raise DataNotFoundError("Validated data entry not found.")
-            logging.info(f"[table_model] Retrieve all data {ImageTag.__tablename__}.")
+                logging.warning(
+                    "[extract_validated_image_tag] No validated data entry!"
+                )
+
             return [dict(row._mapping) for row in rows]
         except DataNotFoundError:
             raise
@@ -98,7 +98,35 @@ async def extract_validated_image_tag() -> list:
             logging.error(
                 f"[extract_validated_image_tag] Error retrieving all entry: {e}"
             )
-            await session.rollback()
+            session.rollback()
             raise DatabaseQueryError(detail="Invalid database query")
         finally:
-            await session.close()
+            session.close()
+
+
+def update_image_tag_is_trained(entries: list[dict]) -> None:
+    with database_connection().connect() as session:
+        try:
+            ids_to_update = [entry["id"] for entry in entries]
+            if not ids_to_update:
+                logging.warning("[update_image_tag_is_trained] No entries to update!")
+                return
+
+            query = (
+                update(ImageTag)
+                .where(ImageTag.id.in_(ids_to_update))
+                .values(is_trained=True)
+            )
+
+            session.execute(query)
+            session.commit()
+
+            logging.info(
+                f"[update_image_tag_is_trained] Updated {len(ids_to_update)} entries successfully."
+            )
+        except Exception as e:
+            logging.error(f"[update_image_tag_is_trained] Error updating entries: {e}")
+            session.rollback()
+            raise DatabaseQueryError(detail="Failed to update database entries")
+        finally:
+            session.close()
