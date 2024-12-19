@@ -1,6 +1,6 @@
+import logging
 from typing import Callable
 from fastapi import Request
-from utils.logger import logging
 from fastapi.responses import JSONResponse
 
 

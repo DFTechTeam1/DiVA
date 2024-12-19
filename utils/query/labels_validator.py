@@ -1,12 +1,13 @@
 from sqlalchemy import update
 from services.postgres.connection import database_connection
 from services.postgres.models import ImageTag
-from utils.custom_errors import DatabaseQueryError, DataNotFoundError
+from utils.custom_errors import DatabaseQueryError
 from utils.logger import logging
 
 
 async def update_labels(
     image_id: int,
+    ip_address: str,
     artifacts: bool = False,
     nature: bool = False,
     living_beings: bool = False,
@@ -28,7 +29,7 @@ async def update_labels(
     gold: bool = False,
     asian: bool = False,
     european: bool = False,
-) -> dict | None:
+) -> dict:
     async with database_connection(connection_type="async").connect() as session:
         try:
             update_values = {
@@ -56,31 +57,16 @@ async def update_labels(
                 "is_validated": True,
             }
 
-            # Construct the update query
             query = (
                 update(ImageTag)
-                .where(ImageTag.id == image_id)
+                .where(ImageTag.id == image_id, ImageTag.ip_address == ip_address)
                 .values(update_values)
-                .returning(
-                    *ImageTag.__table__.columns
-                )  # Return all columns after update
+                .returning(*ImageTag.__table__.columns)
             )
 
-            # Execute the query
-            result = await session.execute(query)
-            await session.commit()  # Commit the transaction
+            await session.execute(query)
+            await session.commit()
 
-            # Fetch the updated row
-            row = result.fetchone()
-
-            if not row:
-                logging.error(
-                    f"[update_labels] No entry found for ImageTag with ID: {image_id}"
-                )
-                raise DataNotFoundError(detail="Data entry not found")
-
-        except DataNotFoundError:
-            raise
         except DatabaseQueryError:
             raise
         except Exception as e:
@@ -89,4 +75,3 @@ async def update_labels(
             raise DatabaseQueryError(detail="Invalid database query")
         finally:
             await session.close()
-    return None

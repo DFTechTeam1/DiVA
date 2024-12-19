@@ -16,4 +16,4 @@ class TaskResultState(BaseModel):
 class ResponseDefault(BaseModel):
     success: bool = True
     message: str = None
-    data: Union[dict, list, str, Optional[Pagination]] = None
+    data: Union[dict, list, str, Optional[Pagination], Optional[TaskResultState]] = None

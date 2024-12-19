@@ -11,7 +11,7 @@ router = APIRouter(tags=["Classification"])
 async def labels_distribution(
     request: Request,
     page: int = Query(
-        default=1, ge=1, description="Total page availabel for current chunk data."
+        default=1, ge=1, description="Total page available for current chunk data."
     ),
     image_per_page: int = Query(
         default=10, ge=1, description="Splitted total image into current chunk data."

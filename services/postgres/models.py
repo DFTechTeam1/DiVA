@@ -2,6 +2,7 @@ from datetime import datetime
 from utils.helper import local_time
 from sqlmodel import SQLModel, Field, Relationship
 from services.postgres.connection import database_connection
+from src.schema.request_format import ModelType
 
 
 class CategoryDataDocumentation(SQLModel, table=True):
@@ -131,12 +132,29 @@ class ModelCard(SQLModel, table=True):
     __tablename__ = "model_card"
     id: int = Field(primary_key=True)
     created_at: datetime = Field(default=local_time())
-    updated_at: datetime = Field(default=None)
+    updated_at: datetime | None = Field(default=None)
     started_task_at: datetime = Field(default=None)
     finished_task_at: datetime = Field(default=None)
     unique_id: str = Field(unique=True, default=None)
     model_name: str = Field(default=None)
+    model_path: str = Field(default=None)
+    model_type: ModelType = Field(default=None)
     trained_image: int = Field(default=None)
+    model_details: list["ModelAccuracy"] = Relationship(
+        back_populates="information", cascade_delete=True
+    )
+
+
+class ModelAccuracy(SQLModel, table=True):
+    __tablename__ = "model_accuracy"
+    id: int = Field(primary_key=True)
+    created_at: datetime = Field(default=local_time())
+    unique_id: str = Field(
+        foreign_key="model_card.unique_id",
+        ondelete="CASCADE",
+    )
+    test_accuracy: float = Field(default=None)
+    information: ModelCard = Relationship(back_populates="model_details")
 
 
 class ImageTag(SQLModel, table=True):
@@ -169,6 +187,7 @@ class ImageTag(SQLModel, table=True):
     asian: bool = Field(default=False)
     european: bool = Field(default=False)
     is_validated: bool = Field(default=False)
+    is_trained: bool = Field(default=False)
     ip_address: str = Field(default=None)
 
 
