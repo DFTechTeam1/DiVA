@@ -30,7 +30,6 @@ coverage = "^7.6.9"
 matplotlib = "^3.10.0"
 torchvision = "^0.20.1"
 petname = "^2.6"
-pandas = "^2.2.3"
 opencv-python = "^4.10.0.84"
 
 
