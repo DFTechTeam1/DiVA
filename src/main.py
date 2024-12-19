@@ -8,6 +8,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from utils.query.labels_documentation import initialize_labels_documentation
 from utils.query.image_tag import initialize_image_tag_preparation
 from src.routers.enrich_knowledge import train_models
+from src.routers.monitor_task import monitor_task
 from src.routers.classification import (
     labels_documentation,
     pagination,
@@ -72,6 +73,7 @@ app.include_router(labels_documentation.router)
 app.include_router(pagination.router)
 app.include_router(labels_validator.router)
 app.include_router(train_models.router)
+app.include_router(monitor_task.router)
 
 app.add_exception_handler(
     exc_class_or_status_code=DiVA,
