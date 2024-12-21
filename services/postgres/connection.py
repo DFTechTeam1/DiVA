@@ -27,3 +27,11 @@ def database_connection(
     if connection_type == "async":
         return create_async_engine(url=config.ASYNC_PGSQL_CONNECTION)
     return create_engine(url=config.SYNC_PGSQL_CONNECTION, pool_pre_ping=True)
+
+
+def database_test_connection(
+    connection_type: Literal["sync", "async"] = "sync",
+) -> AsyncEngine | Engine:
+    if connection_type == "async":
+        return create_async_engine(url=config.ASYNC_PGSQL_TEST_CONNECTION)
+    return create_engine(url=config.SYNC_PGSQL_TEST_CONNECTION, pool_pre_ping=True)
