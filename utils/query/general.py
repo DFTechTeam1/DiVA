@@ -47,9 +47,9 @@ async def retrieve_all(table_model: SQLModelMetaclass) -> list:
         except DatabaseQueryError:
             raise
         except Exception as e:
-            logging.error(f"[retrieve_all] Error retieving all entry: {e}")
+            logging.error(f"[retrieve_all] Error retrieving all entry: {e}")
             await session.rollback()
-            raise DatabaseQueryError(detail="Invalid database query")
+            raise DatabaseQueryError(detail="Invalid database query.")
         finally:
             await session.close()
 

@@ -32,6 +32,18 @@ def database_connection(
 def database_test_connection(
     connection_type: Literal["sync", "async"] = "sync",
 ) -> AsyncEngine | Engine:
+    """
+    The function `database_test_connection` creates and returns either a synchronous or asynchronous
+    database engine connection based on the specified connection type.
+
+    :param connection_type: The `connection_type` parameter specifies the type of database connection to
+    be established. It can have two possible values: "sync" or "async", indicating whether the
+    connection should be synchronous or asynchronous, defaults to sync
+    :type connection_type: Literal["sync", "async"] (optional)
+    :return: The function `database_test_connection` returns either an `AsyncEngine` object if the
+    `connection_type` is set to "async", or an `Engine` object if the `connection_type` is set to
+    "sync".
+    """
     if connection_type == "async":
         return create_async_engine(url=config.ASYNC_PGSQL_TEST_CONNECTION)
     return create_engine(url=config.SYNC_PGSQL_TEST_CONNECTION, pool_pre_ping=True)
