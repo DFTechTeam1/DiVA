@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 from utils.custom_errors import DatabaseQueryError, DataNotFoundError
+from fixtures.mock_table import example_table
 
 
 @pytest.mark.asyncio
