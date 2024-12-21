@@ -1,4 +1,4 @@
-from utils.logger import logging
+import logging
 from fastapi import APIRouter, status, Request, Query
 from src.schema.response import ResponseDefault
 from src.schema.request_format import AllowedIpAddress

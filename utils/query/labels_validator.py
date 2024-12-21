@@ -2,7 +2,7 @@ from sqlalchemy import update
 from services.postgres.connection import database_connection
 from services.postgres.models import ImageTag
 from utils.custom_errors import DatabaseQueryError
-from utils.logger import logging
+import logging
 
 
 async def update_labels(

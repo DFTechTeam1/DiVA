@@ -1,6 +1,6 @@
 import json
 import httpx
-from utils.logger import logging
+import logging
 from src.secret import Config
 from src.schema.request_format import (
     LoginNasApi,

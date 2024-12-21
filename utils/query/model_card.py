@@ -2,7 +2,7 @@ from sqlalchemy import insert, select, update
 from services.postgres.connection import database_connection
 from services.postgres.models import ModelCard
 from utils.custom_errors import DatabaseQueryError, DataNotFoundError
-from utils.logger import logging
+import logging
 from sqlalchemy.engine.row import Row
 from utils.helper import local_time
 from datetime import datetime

@@ -1,4 +1,4 @@
-from utils.logger import logging
+import logging
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
