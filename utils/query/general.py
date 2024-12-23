@@ -70,9 +70,10 @@ async def validate_data_availability(table_model: SQLModelMetaclass) -> bool:
     """
     async with database_connection(connection_type="async").connect() as session:
         try:
-            query = select(select(table_model).exists())
+            query = select(table_model).exists().select()
             result = await session.execute(query)
-            return result.scalar()
+            record = result.scalar()
+            return record
 
         except DatabaseQueryError:
             raise

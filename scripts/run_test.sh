@@ -22,7 +22,7 @@ else
 fi
 
 echo "Running tests"
-if ! coverage run -m --source=tests/unit_test pytest tests/unit_test --verbose; then
+if ! coverage run -m --source=tests/ pytest tests/ --verbose; then
   echo "Tests failed!"
   exit 1
 fi

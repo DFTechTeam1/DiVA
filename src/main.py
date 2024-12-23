@@ -2,7 +2,7 @@ from src.secret import Config
 from fastapi import FastAPI, status
 from src.routers import health_check
 from fastapi.middleware.cors import CORSMiddleware
-from services.postgres.models import database_migration, database_test_migration
+from services.postgres.models import database_migration
 from services.postgres.connection import database_connection
 from starlette.middleware.sessions import SessionMiddleware
 from utils.query.labels_documentation import initialize_labels_documentation
@@ -44,7 +44,6 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup():
     await database_migration()
-    await database_test_migration()
     await initialize_labels_documentation()
     await initialize_image_tag_preparation()
 

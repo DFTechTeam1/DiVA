@@ -1,7 +1,7 @@
 from datetime import datetime
 from utils.helper import local_time
 from sqlmodel import SQLModel, Field, Relationship
-from services.postgres.connection import database_connection, database_test_connection
+from services.postgres.connection import database_connection
 from src.schema.request_format import ModelType
 
 
@@ -193,11 +193,5 @@ class ImageTag(SQLModel, table=True):
 
 async def database_migration():
     engine = database_connection(connection_type="async")
-    async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.create_all)
-
-
-async def database_test_migration():
-    engine = database_test_connection(connection_type="async")
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)

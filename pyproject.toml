@@ -31,6 +31,7 @@ matplotlib = "^3.10.0"
 torchvision = "^0.20.1"
 petname = "^2.6"
 opencv-python = "^4.10.0.84"
+pytest-cov = "^6.0.0"
 
 
 [build-system]
@@ -40,7 +41,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
-
+filterwarnings = [
+    "ignore::DeprecationWarning"
+]
 
 [tool.ruff]
 exclude = [

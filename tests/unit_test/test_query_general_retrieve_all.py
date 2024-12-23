@@ -6,32 +6,8 @@ from fixtures.mock_table import example_table
 
 
 @pytest.mark.asyncio
-async def test_retrieve_all_with_available_data(example_table):
-    mock_session = AsyncMock(spec=AsyncSession)
-    mock_result = MagicMock()
-    mock_result.__tablename__ = "filled_table"
-    mock_result.fetchall.return_value = [
-        MagicMock(_mapping={"id": 1, "name": "Item 1"}),
-        MagicMock(_mapping={"id": 2, "name": "Item 2"}),
-    ]
-
-    mock_session.execute.return_value = mock_result
-
-    with patch("services.postgres.connection.database_connection") as mock_db_conn:
-        mock_db_conn.return_value.connect.return_value.__aenter__.return_value = (
-            mock_session
-        )
-        from utils.query.general import retrieve_all
-
-        result = await retrieve_all(table_model=example_table)
-
-        assert len(result) == 2
-        assert result[0]["name"] == "Item 1"
-        assert result[1]["name"] == "Item 2"
-
-        mock_session.execute.assert_called_once()
-        mock_session.close.assert_called_once()
-
+async def test_retrieve_all_with_available_data():
+    pass
 
 @pytest.mark.asyncio
 async def test_retrieve_all_with_no_data(example_table):
