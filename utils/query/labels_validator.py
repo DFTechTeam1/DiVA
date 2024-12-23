@@ -1,7 +1,7 @@
-from sqlalchemy import update
+from sqlalchemy import update, select
 from services.postgres.connection import database_connection
 from services.postgres.models import ImageTag
-from utils.custom_errors import DatabaseQueryError
+from utils.custom_errors import DatabaseQueryError, DataNotFoundError
 import logging
 
 
@@ -57,16 +57,26 @@ async def update_labels(
                 "is_validated": True,
             }
 
-            query = (
-                update(ImageTag)
-                .where(ImageTag.id == image_id, ImageTag.ip_address == ip_address)
-                .values(update_values)
-                .returning(*ImageTag.__table__.columns)
+            record = select(ImageTag).where(
+                ImageTag.id == image_id, ImageTag.ip_address == ip_address
             )
+            result = await session.execute(record)
+            row = result.scalar()
 
-            await session.execute(query)
-            await session.commit()
+            if row:
+                query = (
+                    update(ImageTag)
+                    .where(ImageTag.id == image_id, ImageTag.ip_address == ip_address)
+                    .values(update_values)
+                    .returning(*ImageTag.__table__.columns)
+                )
 
+                await session.execute(query)
+                await session.commit()
+            else:
+                raise DataNotFoundError(detail="No data found to update.")
+        except DataNotFoundError:
+            raise
         except DatabaseQueryError:
             raise
         except Exception as e:
