@@ -61,10 +61,25 @@ async def test_labels_description_with_invalid_page_parameters() -> None:
     params = {
         "page": page,
     }
-    total_validated_images = extract_image_tag_entries(is_validated=True)
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.get("/api/v1/classification/label-distribution", params=params)
         response = res.json()
 
         assert res.status_code == 200
-        assert response["data"]["images"] == None
+        assert response["data"]["images"] is None
+
+@pytest.mark.asyncio
+async def test_labels_description_with_all_invalid_parameters() -> None:
+    page = randint(10000, 20000)
+    image_per_page = randint(10000, 20000)
+    params = {
+        "page": page,
+        "image_per_page": image_per_page
+    }
+    async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
+        res = await client.get("/api/v1/classification/label-distribution", params=params)
+        response = res.json()
+
+        assert res.status_code == 200
+        assert response["data"]["available_page"] == 1
+        assert response["data"]["images"] is None
