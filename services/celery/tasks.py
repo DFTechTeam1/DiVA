@@ -1,5 +1,5 @@
 import sys
-import logging
+from utils.logger import logging
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))

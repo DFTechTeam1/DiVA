@@ -2,7 +2,7 @@ from sqlalchemy import update, select
 from services.postgres.connection import database_connection
 from services.postgres.models import ImageTag
 from utils.custom_errors import DatabaseQueryError, AccessUnauthorized
-import logging
+from utils.logger import logging
 
 
 async def update_labels(

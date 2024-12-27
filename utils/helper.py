@@ -4,7 +4,7 @@ import random
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
-import logging
+from utils.logger import logging
 from utils.custom_errors import DataNotFoundError
 
 

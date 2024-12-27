@@ -1,6 +1,6 @@
 import csv
 import os
-import logging
+from utils.logger import logging
 from pathlib import Path
 
 

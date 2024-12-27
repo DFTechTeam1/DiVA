@@ -1,4 +1,4 @@
-import logging
+from utils.logger import logging
 from services.postgres.connection import database_connection
 from utils.custom_errors import DatabaseQueryError, DataNotFoundError
 from sqlmodel.main import SQLModelMetaclass

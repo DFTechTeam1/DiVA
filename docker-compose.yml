@@ -1,6 +1,6 @@
 services:
-  postgre_sql:
-    container_name: postgre-sql-container
+  diva_postgre_sql:
+    container_name: diva_postgre_sql
     image: postgres:14-alpine
     restart: always
     environment:
@@ -10,29 +10,14 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - postgre_sql_data:/var/lib/postgresql/data
+      - ./volumes/postgre_sql:/var/lib/postgresql/data
     networks:
       app_net:
         ipv4_address: 172.18.0.30
 
-  postgre_sql_test:
-    container_name: postgre-sql-test-container
-    image: postgres:14-alpine
-    restart: always
-    environment:
-      - POSTGRES_USER=${LOCAL_POSTGRESQL_TEST_USER}
-      - POSTGRES_PASSWORD=${LOCAL_POSTGRESQL_TEST_PASSWORD}
-      - POSTGRES_DB=${LOCAL_POSTGRESQL_TEST_DATABASE}
-    ports:
-      - 5400:5432
-    volumes:
-      - postgre_sql_test_data:/var/lib/postgresql/data
-    networks:
-      app_net:
-        ipv4_address: 172.18.0.31
-
-  pg_admin:
-    container_name: pgadmin4-container
+  diva_pgadmin:
+    user: root
+    container_name: diva_pgadmin
     image: dpage/pgadmin4:8.14.0
     restart: always
     environment:
@@ -42,14 +27,14 @@ services:
     ports:
       - 5050:5050
     volumes:
-      - pgadmin_data:/var/lib/pgadmin/
+      - ./volumes/pgadmin:/var/lib/pgadmin/
 
     networks:
       app_net:
-        ipv4_address: 172.18.0.32
+        ipv4_address: 172.18.0.31
 
-  rabbitmq:
-    container_name: rabbitmq-container
+  diva_rabbitmq:
+    container_name: diva_rabbitmq
     image: rabbitmq:management-alpine
     restart: always
     environment:
@@ -59,18 +44,11 @@ services:
       - 5672:5672
       - 15672:15672
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-      - rabbitmq_log:/var/log/rabbitmq
+      - ./volumes/rabbitmq/rabbitmq_data:/var/lib/rabbitmq
+      - ./volumes/rabbitmq/rabbitmq_log:/var/log/rabbitmq
     networks:
       app_net:
-        ipv4_address: 172.18.0.33
-
-volumes:
-  postgre_sql_data:
-  postgre_sql_test_data:
-  pgadmin_data:
-  rabbitmq_data:
-  rabbitmq_log:
+        ipv4_address: 172.18.0.32
 
 networks:
   app_net:

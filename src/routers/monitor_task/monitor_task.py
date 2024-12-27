@@ -1,4 +1,4 @@
-import logging
+from utils.logger import logging
 from uuid import UUID
 from celery.result import AsyncResult
 from fastapi import APIRouter, status

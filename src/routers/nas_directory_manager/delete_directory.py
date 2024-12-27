@@ -1,5 +1,5 @@
 import os
-import logging
+from utils.logger import logging
 from fastapi import APIRouter, status
 from src.schema.response import ResponseDefault
 from src.schema.request_format import NasDeleteDirectory

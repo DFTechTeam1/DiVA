@@ -2,7 +2,7 @@ from sqlalchemy import insert
 from services.postgres.connection import database_connection
 from services.postgres.models import ModelAccuracy
 from utils.custom_errors import DatabaseQueryError
-import logging
+from utils.logger import logging
 from utils.helper import local_time
 
 

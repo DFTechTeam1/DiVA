@@ -1,4 +1,4 @@
-import logging
+from utils.logger import logging
 from services.postgres.connection import database_connection
 from services.postgres.models import ImageTag
 from sqlalchemy import select, func

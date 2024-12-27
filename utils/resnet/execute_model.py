@@ -8,7 +8,7 @@ from typing import Literal
 from petname import generate
 from datetime import datetime
 from torch.optim import Adam
-import logging
+from utils.logger import logging
 from torch.nn import BCEWithLogitsLoss
 from torch.utils.data import DataLoader
 from utils.helper import label_distribution

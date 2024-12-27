@@ -1,4 +1,4 @@
-import logging
+from utils.logger import logging
 from fastapi import APIRouter, status
 from src.schema.response import ResponseDefault
 from services.celery.tasks import train_finetune_custom_resnet50

@@ -1,4 +1,4 @@
-import logging
+from utils.logger import logging
 from sqlalchemy import select, update
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession

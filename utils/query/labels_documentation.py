@@ -1,4 +1,4 @@
-import logging
+from utils.logger import logging
 from sqlalchemy import insert
 from uuid import uuid4
 from services.postgres.connection import database_connection
