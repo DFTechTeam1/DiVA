@@ -42,7 +42,7 @@ async def labels_distribution(
 
 router.add_api_route(
     methods=["GET"],
-    path="/classification/label-distribution",
+    path="/classification/paginate",
     endpoint=labels_distribution,
     summary="Retrieve chunked image entries.",
     status_code=status.HTTP_200_OK,

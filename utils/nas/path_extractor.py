@@ -182,6 +182,38 @@ async def check_shared_folder_already_exist(
     return None
 
 
+async def check_target_dir_already_exist(
+    connection_id: str, ip_address: str, shared_folder: str, target_folder: str
+) -> None:
+    params = ListShareNasApi(
+        api="SYNO.FileStation.List",
+        version=2,
+        method="list",
+        _sid=connection_id,
+        folder_path=shared_folder + "/" + target_folder,
+    )
+
+    port = port_matcher(ip_address=ip_address)
+
+    NAS_BASE_URL = f"http://{ip_address}:{port}/webapi/auth.cgi"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            logging.info(
+                "[check_target_dir_already_exist] Validate target folder already on NAS via API."
+            )
+            response = await client.get(NAS_BASE_URL, params=params.model_dump())
+            response.raise_for_status()
+            data = response.json()
+        except Exception as e:
+            logging.error(
+                f"[check_shared_folder_already_exist] Cannot initialize NAS connection: {e}"
+            )
+        finally:
+            await client.aclose()
+        return data
+
+
 async def create_nas_dir(
     connection_id: str,
     ip_address: str,

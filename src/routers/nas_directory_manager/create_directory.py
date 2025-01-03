@@ -8,6 +8,7 @@ from utils.nas.path_extractor import (
     logout_nas,
     check_shared_folder_already_exist,
     create_nas_dir,
+    check_target_dir_already_exist,
 )
 
 router = APIRouter(tags=["Directory Management"])
@@ -34,6 +35,20 @@ async def create_nas_directory(schema: NasDirectoryManagement) -> ResponseDefaul
         ip_address=schema.ip_address,
         folder_path=schema.folder_path,
     )
+    is_available = await check_target_dir_already_exist(
+        connection_id=conn_id,
+        ip_address=schema.ip_address,
+        shared_folder=schema.folder_path,
+        target_folder=schema.directory_name,
+    )
+
+    if is_available["success"]:
+        await logout_nas(ip_address=schema.ip_address)
+        response.message = (
+            f"Directory {schema.folder_path+"/"+schema.directory_name} already exist."
+        )
+        return response
+
     await create_nas_dir(
         connection_id=conn_id,
         ip_address=schema.ip_address,

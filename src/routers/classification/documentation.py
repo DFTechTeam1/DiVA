@@ -28,7 +28,7 @@ async def labels_documentation(request: Request) -> ResponseDefault:
 
 router.add_api_route(
     methods=["GET"],
-    path="/classification/label-docs",
+    path="/classification/docs",
     endpoint=labels_documentation,
     summary="Retrieve label documentation.",
     status_code=status.HTTP_200_OK,

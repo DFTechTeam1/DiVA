@@ -1,7 +1,7 @@
 from sqlalchemy import update, select
 from services.postgres.connection import database_connection
 from services.postgres.models import ImageTag
-from utils.custom_errors import DatabaseQueryError, AccessUnauthorized
+from utils.custom_errors import DatabaseQueryError, DataNotFoundError
 from utils.logger import logging
 
 
@@ -74,8 +74,8 @@ async def update_labels(
                 await session.execute(query)
                 await session.commit()
             else:
-                raise AccessUnauthorized(detail="Cannot update data.")
-        except AccessUnauthorized:
+                raise DataNotFoundError(detail="Data not found.")
+        except DataNotFoundError:
             raise
         except DatabaseQueryError:
             raise

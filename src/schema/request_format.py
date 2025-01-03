@@ -15,8 +15,8 @@ class IpAddress(BaseModel):
 
 class AllowedIpAddress(BaseModel):
     ip_address: list = [
-        "192.168.100.1",
-        "192.168.100.2",
+        "192.168.99.30",
+        "192.168.99.141",
         "192.168.100.3",
         "192.168.100.4",
         "192.168.100.5",
@@ -96,6 +96,7 @@ class SynologyMethod(BaseModel):
         "rename",
         "start",
         "status",
+        "list",
     ]
 
 
