@@ -21,16 +21,22 @@ async def update_nas_directory(schema: NasMoveDirectory) -> ResponseDefault:
         if len(schema.path) > 1:
             from_path = os.path.commonpath(schema.path)
             target_path = os.path.commonpath(schema.dest_folder_path)
-            response.message = f"Moved multiple directories from {schema.ip_address}{from_path} into {schema.ip_address}{target_path}"
+            response.message = (
+                f"Moved multiple directories from {schema.ip_address}{from_path} into {schema.ip_address}{target_path}"
+            )
         elif len(schema.path) == 1:
             old_path = schema.path[0]
-            response.message = f"Moved a directory from {schema.ip_address}{old_path} into {schema.ip_address}{schema.dest_folder_path[0]}"
+            response.message = (
+                f"Moved a directory from {schema.ip_address}{old_path} into {schema.ip_address}{schema.dest_folder_path[0]}"
+            )
         else:
             response.success = False
             response.message = "No folder paths provided."
     elif isinstance(schema.path, str):
         old_path = schema.path
-        response.message = f"Moved a directory from {schema.ip_address}{old_path} into {schema.ip_address}{schema.dest_folder_path}"
+        response.message = (
+            f"Moved a directory from {schema.ip_address}{old_path} into {schema.ip_address}{schema.dest_folder_path}"
+        )
     else:
         response.success = False
         response.message = "Invalid folder_path format."

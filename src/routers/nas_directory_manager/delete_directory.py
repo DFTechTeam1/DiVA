@@ -22,9 +22,7 @@ async def delete_nas_directory(schema: NasDeleteDirectory) -> ResponseDefault:
 
     if isinstance(schema.folder_path, list) and len(schema.folder_path) > 1:
         common_path = os.path.commonpath(schema.folder_path)
-        response.message = (
-            f"Deleted multiple directory on {schema.ip_address}{common_path}"
-        )
+        response.message = f"Deleted multiple directory on {schema.ip_address}{common_path}"
     if isinstance(schema.folder_path, list) and len(schema.folder_path) == 1:
         common_path = os.path.commonpath(schema.folder_path)
         response.message = f"Deleted a directory in {schema.ip_address}{common_path}"

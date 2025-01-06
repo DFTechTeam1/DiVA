@@ -59,9 +59,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(
-    middleware_class=SessionMiddleware, secret_key=config.MIDDLEWARE_SECRET_KEY
-)
+app.add_middleware(middleware_class=SessionMiddleware, secret_key=config.MIDDLEWARE_SECRET_KEY)
 
 app.include_router(health_check.router)
 app.include_router(create_directory.router)

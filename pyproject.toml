@@ -46,6 +46,5 @@ filterwarnings = [
 ]
 
 [tool.ruff]
-exclude = [
-    "tests"
-]
+exclude = ["tests"]
+line-length = 130

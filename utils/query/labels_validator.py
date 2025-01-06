@@ -57,9 +57,7 @@ async def update_labels(
                 "is_validated": True,
             }
 
-            record = select(ImageTag).where(
-                ImageTag.id == image_id, ImageTag.ip_address == ip_address
-            )
+            record = select(ImageTag).where(ImageTag.id == image_id, ImageTag.ip_address == ip_address)
             result = await session.execute(record)
             row = result.scalar()
 

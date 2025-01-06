@@ -32,15 +32,11 @@ def insert_classification_model_card(
             )
             session.execute(query)
             session.commit()
-            logging.info(
-                f"[insert_classification_model_card] Inserted new {model_type} model card."
-            )
+            logging.info(f"[insert_classification_model_card] Inserted new {model_type} model card.")
         except DatabaseQueryError:
             raise
         except Exception as e:
-            logging.error(
-                f"[insert_classification_model_card] Error inserting data: {e}"
-            )
+            logging.error(f"[insert_classification_model_card] Error inserting data: {e}")
             session.rollback()
             raise DatabaseQueryError(detail="Database query failed.")
         finally:
@@ -61,9 +57,7 @@ def extract_models_card_entry(
         except DatabaseQueryError:
             raise
         except Exception as e:
-            logging.error(
-                f"[insert_classification_model_card] Error inserting data: {e}"
-            )
+            logging.error(f"[insert_classification_model_card] Error inserting data: {e}")
             session.rollback()
             raise DatabaseQueryError(detail="Database query failed.")
         finally:

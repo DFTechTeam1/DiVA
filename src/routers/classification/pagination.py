@@ -10,12 +10,8 @@ router = APIRouter(tags=["Classification"])
 
 async def labels_distribution(
     request: Request,
-    page: int = Query(
-        default=1, ge=1, description="Total page available for current chunk data."
-    ),
-    image_per_page: int = Query(
-        default=10, ge=1, description="Splitted total image into current chunk data."
-    ),
+    page: int = Query(default=1, ge=1, description="Total page available for current chunk data."),
+    image_per_page: int = Query(default=10, ge=1, description="Splitted total image into current chunk data."),
     is_validated: bool = False,
 ) -> ResponseDefault:
     logging.info("Endpoint Labels Distribution.")
@@ -25,9 +21,7 @@ async def labels_distribution(
 
     ip_address = request.client.host
     if ip_address not in allow_ips.ip_address:
-        raise AccessUnauthorized(
-            "IP Address blacklisted. Please ask IT Team for add IP as whitelist."
-        )
+        raise AccessUnauthorized("IP Address blacklisted. Please ask IT Team for add IP as whitelist.")
 
     pagination = await extract_distributed_entries(
         page=page,

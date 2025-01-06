@@ -49,12 +49,8 @@ class CustomDataLoader:
         represents the fraction of the dataset to be included in the test split. For example, if
         :type test_size: int
         """
-        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
-            self.images, self.labels, test_size=0.1
-        )
-        self.x_train, self.x_val, self.y_train, self.y_val = train_test_split(
-            self.x_train, self.y_train, test_size=0.1
-        )
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.images, self.labels, test_size=0.1)
+        self.x_train, self.x_val, self.y_train, self.y_val = train_test_split(self.x_train, self.y_train, test_size=0.1)
 
         self.train_size = self.x_train.shape[0]
         self.val_size = self.x_val.shape[0]
@@ -105,9 +101,7 @@ class CustomResNet50Classifier(Module):
         super(CustomResNet50Classifier, self).__init__()
         self.custom_resnet50_model = models.resnet50(weights=ResNet50_Weights.DEFAULT)
         self.in_features = self.custom_resnet50_model.fc.in_features
-        self.custom_resnet50_model.fc = Linear(
-            in_features=self.in_features, out_features=num_labels
-        )
+        self.custom_resnet50_model.fc = Linear(in_features=self.in_features, out_features=num_labels)
 
     def forward(self, image):
         return self.custom_resnet50_model(image)

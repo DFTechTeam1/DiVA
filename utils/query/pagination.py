@@ -7,24 +7,18 @@ from utils.custom_errors import DataNotFoundError, DatabaseQueryError
 from src.schema.response import Pagination
 
 
-async def extract_distributed_entries(
-    page: int, image_per_page: int, ip_address: str, is_validated: bool
-) -> Pagination:
+async def extract_distributed_entries(page: int, image_per_page: int, ip_address: str, is_validated: bool) -> Pagination:
     response = Pagination()
 
     async with database_connection(connection_type="async").connect() as session:
         try:
-            skip_entry = [
-                0 if page == 1 else ((image_per_page * page) - image_per_page)
-            ]
+            skip_entry = [0 if page == 1 else ((image_per_page * page) - image_per_page)]
 
             query = (
                 select(ImageTag)
                 .where(
-                    and_(
-                        ImageTag.ip_address == ip_address,
-                        ImageTag.is_validated == is_validated,
-                    )
+                    ImageTag.ip_address == ip_address,
+                    ImageTag.is_validated == is_validated,
                 )
                 .limit(image_per_page)
                 .offset(skip_entry[0])
@@ -63,9 +57,7 @@ async def extract_distributed_entries(
         except DatabaseQueryError:
             raise
         except Exception as e:
-            logging.error(
-                f"[extract_distributed_entries] Error while extracting pagination: {e}"
-            )
+            logging.error(f"[extract_distributed_entries] Error while extracting pagination: {e}")
             await session.rollback()
             raise DatabaseQueryError(detail="Invalid database query.")
         finally:

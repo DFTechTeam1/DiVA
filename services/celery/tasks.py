@@ -1,8 +1,8 @@
 import sys
-from utils.logger import logging
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
+from utils.logger import logging
 from services.celery.worker import app
 from utils.resnet.execute_model import (
     custom_resnet50_trainer,

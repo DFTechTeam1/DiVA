@@ -39,15 +39,8 @@ def grab_shared_dir(path: str | list[str]) -> str | None:
             raise NasIntegrationError(
                 detail="folder_path should contain at least 1 value startswith '/' as array of string (e.g: ['/Dfactory/...'])."
             )
-        if (
-            isinstance(path, str)
-            and not path.startswith("/")
-            or isinstance(path, list)
-            and not path[0].startswith("/")
-        ):
-            raise NasIntegrationError(
-                detail="folder_path should be startswith '/' (e.g: /Dfactory/...)."
-            )
+        if isinstance(path, str) and not path.startswith("/") or isinstance(path, list) and not path[0].startswith("/"):
+            raise NasIntegrationError(detail="folder_path should be startswith '/' (e.g: /Dfactory/...).")
     except NasIntegrationError:
         raise
     except Exception as e:
@@ -88,9 +81,7 @@ async def login_nas(ip_address: str) -> str | None:
             data = response.json()
 
             if not data.get("success"):
-                logging.error(
-                    "[login_nas] Login failed, please ensure request are appropriate."
-                )
+                logging.error("[login_nas] Login failed, please ensure request are appropriate.")
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
@@ -107,9 +98,7 @@ async def login_nas(ip_address: str) -> str | None:
 
 
 async def logout_nas(ip_address: str) -> None:
-    params = LogoutNasApi(
-        api="SYNO.API.Auth", version=1, method="logout", session="FileStation"
-    )
+    params = LogoutNasApi(api="SYNO.API.Auth", version=1, method="logout", session="FileStation")
     port = port_matcher(ip_address=ip_address)
     NAS_BASE_URL = f"http://{ip_address}:{port}/webapi/auth.cgi"
     async with httpx.AsyncClient() as client:
@@ -120,9 +109,7 @@ async def logout_nas(ip_address: str) -> None:
             data = response.json()
 
             if not data.get("success"):
-                logging.error(
-                    "[logout_nas] Logout failed, please ensure request are appropriate."
-                )
+                logging.error("[logout_nas] Logout failed, please ensure request are appropriate.")
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
@@ -135,12 +122,8 @@ async def logout_nas(ip_address: str) -> None:
     return None
 
 
-async def check_shared_folder_already_exist(
-    connection_id: str, ip_address: str, folder_path: str | list[str]
-) -> None:
-    params = ListShareNasApi(
-        api="SYNO.FileStation.List", version=2, method="list_share", _sid=connection_id
-    )
+async def check_shared_folder_already_exist(connection_id: str, ip_address: str, folder_path: str | list[str]) -> None:
+    params = ListShareNasApi(api="SYNO.FileStation.List", version=2, method="list_share", _sid=connection_id)
 
     port = port_matcher(ip_address=ip_address)
 
@@ -148,9 +131,7 @@ async def check_shared_folder_already_exist(
 
     async with httpx.AsyncClient() as client:
         try:
-            logging.info(
-                "[check_shared_folder_already_exist] Validate shared folder already on NAS via API."
-            )
+            logging.info("[check_shared_folder_already_exist] Validate shared folder already on NAS via API.")
             response = await client.get(NAS_BASE_URL, params=params.model_dump())
             response.raise_for_status()
             data = response.json()
@@ -174,17 +155,13 @@ async def check_shared_folder_already_exist(
         except DataNotFoundError:
             raise
         except Exception as e:
-            logging.error(
-                f"[check_shared_folder_already_exist] Cannot initialize NAS connection: {e}"
-            )
+            logging.error(f"[check_shared_folder_already_exist] Cannot initialize NAS connection: {e}")
         finally:
             await client.aclose()
     return None
 
 
-async def check_target_dir_already_exist(
-    connection_id: str, ip_address: str, shared_folder: str, target_folder: str
-) -> None:
+async def check_target_dir_already_exist(connection_id: str, ip_address: str, shared_folder: str, target_folder: str) -> None:
     params = ListShareNasApi(
         api="SYNO.FileStation.List",
         version=2,
@@ -199,16 +176,12 @@ async def check_target_dir_already_exist(
 
     async with httpx.AsyncClient() as client:
         try:
-            logging.info(
-                "[check_target_dir_already_exist] Validate target folder already on NAS via API."
-            )
+            logging.info("[check_target_dir_already_exist] Validate target folder already on NAS via API.")
             response = await client.get(NAS_BASE_URL, params=params.model_dump())
             response.raise_for_status()
             data = response.json()
         except Exception as e:
-            logging.error(
-                f"[check_shared_folder_already_exist] Cannot initialize NAS connection: {e}"
-            )
+            logging.error(f"[check_shared_folder_already_exist] Cannot initialize NAS connection: {e}")
         finally:
             await client.aclose()
         return data
@@ -247,18 +220,14 @@ async def create_nas_dir(
             data = response.json()
 
             if not data.get("success"):
-                logging.error(
-                    "[create_nas_dir] Creating new NAS directory failed, please ensure request are appropriate."
-                )
+                logging.error("[create_nas_dir] Creating new NAS directory failed, please ensure request are appropriate.")
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
         except NasIntegrationError:
             raise
         except Exception as e:
-            logging.error(
-                f"[create_nas_dir] Error while creating new directory in NAS: {e}"
-            )
+            logging.error(f"[create_nas_dir] Error while creating new directory in NAS: {e}")
         finally:
             await client.aclose()
     return None
@@ -297,18 +266,14 @@ async def update_nas_dir(
             data = response.json()
 
             if not data.get("success"):
-                logging.error(
-                    "[update_nas_dir] Updating existing NAS directory failed, please ensure request are appropriate."
-                )
+                logging.error("[update_nas_dir] Updating existing NAS directory failed, please ensure request are appropriate.")
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
         except NasIntegrationError:
             raise
         except Exception as e:
-            logging.error(
-                f"[update_nas_dir] Error while updating directory in NAS: {e}"
-            )
+            logging.error(f"[update_nas_dir] Error while updating directory in NAS: {e}")
         finally:
             await client.aclose()
     return None
@@ -343,18 +308,14 @@ async def delete_nas_dir(
             data = response.json()
 
             if not data.get("success"):
-                logging.error(
-                    "[delete_nas_dir] Deleting existing NAS directory failed, please ensure request are appropriate."
-                )
+                logging.error("[delete_nas_dir] Deleting existing NAS directory failed, please ensure request are appropriate.")
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
         except NasIntegrationError:
             raise
         except Exception as e:
-            logging.error(
-                f"[delete_nas_dir] Error while deleting directory in NAS: {e}"
-            )
+            logging.error(f"[delete_nas_dir] Error while deleting directory in NAS: {e}")
         finally:
             await client.aclose()
     return None
@@ -393,9 +354,7 @@ async def move_nas_dir(
             data = response.json()
 
             if not data.get("success"):
-                logging.error(
-                    "[move_nas_dir] Moving existing NAS directory failed, please ensure request are appropriate."
-                )
+                logging.error("[move_nas_dir] Moving existing NAS directory failed, please ensure request are appropriate.")
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 

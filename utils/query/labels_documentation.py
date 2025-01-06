@@ -17,9 +17,7 @@ from services.postgres.models import (
 )
 
 
-async def insert_category_documentation(
-    table_model: SQLModelMetaclass, category: str, description: str
-) -> str:
+async def insert_category_documentation(table_model: SQLModelMetaclass, category: str, description: str) -> str:
     """
     This async function inserts documentation for a category into a database table and returns the
     unique ID generated for the entry.
@@ -54,9 +52,7 @@ async def insert_category_documentation(
         except DatabaseQueryError:
             raise
         except Exception as e:
-            logging.error(
-                f"[validate_data_availability] Error while validating data availability: {e}"
-            )
+            logging.error(f"[validate_data_availability] Error while validating data availability: {e}")
             await session.rollback()
             raise DatabaseQueryError(detail="Invalid database query")
         finally:
@@ -65,9 +61,7 @@ async def insert_category_documentation(
     return unique_id
 
 
-async def insert_details_documentation(
-    table_model: SQLModelMetaclass, unique_id: str, category: str, description: str
-):
+async def insert_details_documentation(table_model: SQLModelMetaclass, unique_id: str, category: str, description: str):
     """
     This asynchronous function inserts details documentation into a database table using the provided
     parameters.
@@ -103,9 +97,7 @@ async def insert_details_documentation(
         except DatabaseQueryError:
             raise
         except Exception as e:
-            logging.error(
-                f"[validate_data_availability] Error while validating data availability: {e}"
-            )
+            logging.error(f"[validate_data_availability] Error while validating data availability: {e}")
             await session.rollback()
             raise DatabaseQueryError(detail="Invalid database query")
         finally:
@@ -299,9 +291,7 @@ async def insert_culture_styles_documentation():
 
 
 async def initialize_labels_documentation():
-    is_available = await validate_data_availability(
-        table_model=CategoryDataDocumentation
-    )
+    is_available = await validate_data_availability(table_model=CategoryDataDocumentation)
     if not is_available:
         logging.info("Initialized labels documentation.")
         await insert_object_documentation()

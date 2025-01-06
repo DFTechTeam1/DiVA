@@ -1,6 +1,6 @@
 from enum import StrEnum
 from typing import Literal
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, Extra
 
 
 class IpAddress(BaseModel):
@@ -43,9 +43,6 @@ class NasMoveDirectory(IpAddress):
 
 
 class LabelsValidator(BaseModel):
-    image_id: int = Field(
-        default=None, ge=1, description="Image ID must be greater than or equal to 1"
-    )
     artifacts: bool = False
     nature: bool = False
     living_beings: bool = False
@@ -122,35 +119,25 @@ class LoginNasApi(
     format: Literal["cookie"] = None
 
 
-class LogoutNasApi(
-    SynologyApiPath, SynologyApiVersion, SynologyMethod, SynologyApiSession
-):
+class LogoutNasApi(SynologyApiPath, SynologyApiVersion, SynologyMethod, SynologyApiSession):
     pass
 
 
-class ListShareNasApi(
-    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
-):
+class ListShareNasApi(SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams):
     pass
 
 
-class CreateFolderNasApi(
-    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
-):
+class CreateFolderNasApi(SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams):
     folder_path: str | list[str] = None
     name: str | list[str] = None
 
 
-class UpdateFolderNasApi(
-    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
-):
+class UpdateFolderNasApi(SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams):
     path: str | list[str] = None
     name: str | list[str] = None
 
 
-class DeleteFolderNasApi(
-    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
-):
+class DeleteFolderNasApi(SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams):
     path: str | list[str] = None
 
 

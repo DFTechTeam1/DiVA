@@ -44,9 +44,7 @@ async def create_nas_directory(schema: NasDirectoryManagement) -> ResponseDefaul
 
     if is_available["success"]:
         await logout_nas(ip_address=schema.ip_address)
-        response.message = (
-            f"Directory {schema.folder_path+"/"+schema.directory_name} already exist."
-        )
+        response.message = f"Directory {schema.folder_path+"/"+schema.directory_name} already exist."
         return response
 
     await create_nas_dir(

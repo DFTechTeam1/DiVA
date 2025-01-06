@@ -9,7 +9,7 @@ from utils.custom_errors import DataNotFoundError
 
 
 def find_image_path(
-    image_path: str = "/project_utils/diva/client_preview",
+    image_path: str = "/home/dfactory/custom_nas",
 ) -> list | None:
     """
     The function `find_image_path` takes an image path as input, checks if the directory exists, finds
@@ -30,11 +30,7 @@ def find_image_path(
 
         image_extensions = {".jpg", ".jpeg", ".png"}
 
-        image_paths = [
-            str(path)
-            for path in Path(default_path).rglob("*")
-            if path.suffix.lower() in image_extensions
-        ]
+        image_paths = [str(path) for path in Path(default_path).rglob("*") if path.suffix.lower() in image_extensions]
 
         if not image_paths:
             logging.error(f"[find_image_path] No image files found in {default_path}")
@@ -110,6 +106,4 @@ def label_distribution(entries: list) -> None:
     }
 
     for label, percentages in label_percentages.items():
-        logging.info(
-            f"{label}: True = {percentages['true']:.2f}%, False = {percentages['false']:.2f}%"
-        )
+        logging.info(f"{label}: True = {percentages['true']:.2f}%, False = {percentages['false']:.2f}%")

@@ -20,14 +20,10 @@ async def update_nas_directory(schema: NasDirectoryManagement) -> ResponseDefaul
     if isinstance(schema.folder_path, list):
         if len(schema.folder_path) > 1:
             common_path = os.path.commonpath(schema.folder_path)
-            response.message = (
-                f"Updated multiple directories on {schema.ip_address}{common_path}"
-            )
+            response.message = f"Updated multiple directories on {schema.ip_address}{common_path}"
         elif len(schema.folder_path) == 1:
             old_path = schema.folder_path[0]
-            new_path = (
-                f"{'/'.join(old_path.split('/')[:-1])}/{schema.directory_name[0]}"
-            )
+            new_path = f"{'/'.join(old_path.split('/')[:-1])}/{schema.directory_name[0]}"
             response.message = f"Updated a directory from {schema.ip_address}{old_path} into {schema.ip_address}{new_path}"
         else:
             response.success = False
