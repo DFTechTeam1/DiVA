@@ -1,11 +1,29 @@
 import os
 import string
+import csv
 import random
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
 from utils.logger import logging
 from utils.custom_errors import DataNotFoundError
+
+
+async def save_data(data: list, filename: str) -> None:
+    home_path = Path.home()
+    default_path = Path(f"{home_path}/Project/utils/diva/backup_db")
+    default_path.mkdir(parents=True, exist_ok=True)
+
+    filepath = os.path.join(default_path, filename)
+
+    with open(filepath, mode="w", newline="", encoding="utf-8") as csvfile:
+        fieldnames = data[0].keys()
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        writer.writerows(data)
+
+    logging.info(f"Data successfully saved to {filepath}")
 
 
 def find_image_path(image_path: str = None) -> list | None:
@@ -21,7 +39,7 @@ def find_image_path(image_path: str = None) -> list | None:
     :return: A list of image file paths is being returned by the `find_image_path` function.
     """
     home_path = Path.home()
-    default_path = Path(f"{home_path}/Project/utils/client_preview")
+    default_path = Path(f"{home_path}/Project/utils/diva/client_preview")
 
     try:
         if not os.path.exists(path=default_path):
