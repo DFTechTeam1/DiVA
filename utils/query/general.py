@@ -4,7 +4,7 @@ from utils.custom_errors import DatabaseQueryError, DataNotFoundError
 from sqlmodel.main import SQLModelMetaclass
 from typing import Literal
 from sqlmodel import SQLModel
-from sqlalchemy import select, update
+from sqlalchemy import select, update, insert
 from sqlalchemy.engine.row import Row
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -58,6 +58,24 @@ async def update_record(db: AsyncSession, table: type[SQLModel], conditions: dic
         logging.error(f"Failed to update record in table {table.__name__} with conditions {conditions}: {e}")
         await db.rollback()
         raise DatabaseQueryError(detail="Database query error.")
+    return None
+
+
+async def insert_record(db: AsyncSession, table: type[SQLModel], data: dict) -> None:
+    for column in data.keys():
+        if not hasattr(table, column):
+            raise ValueError(f"Column '{column}' not found in {table.__tablename__} table!")
+
+    try:
+        query = insert(table).values(**data)
+        await db.execute(query)
+        await db.commit()
+        logging.info(f"New record inserted in table {table.__name__}.")
+    except Exception as e:
+        logging.error(f"Failed to insert record in table {table.__name__}: {e}")
+        await db.rollback()
+        raise DatabaseQueryError(detail="Database query error.")
+    return None
 
 
 async def retrieve_all(table_model: SQLModelMetaclass) -> list:
