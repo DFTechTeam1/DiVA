@@ -8,9 +8,7 @@ from utils.logger import logging
 from utils.custom_errors import DataNotFoundError
 
 
-def find_image_path(
-    image_path: str = "/home/dfactory/custom_nas",
-) -> list | None:
+def find_image_path(image_path: str = None) -> list | None:
     """
     The function `find_image_path` takes an image path as input, checks if the directory exists, finds
     image files with specific extensions in the directory, and returns a list of image paths.
@@ -22,7 +20,8 @@ def find_image_path(
     :type image_path: str (optional)
     :return: A list of image file paths is being returned by the `find_image_path` function.
     """
-    default_path = Path(image_path)
+    home_path = Path.home()
+    default_path = Path(f"{home_path}/Project/utils/client_preview")
 
     try:
         if not os.path.exists(path=default_path):

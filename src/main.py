@@ -35,7 +35,6 @@ config = Config()
 async def lifespan(app: FastAPI):
     try:
         await database_migration()
-        await database_migration()
         await initialize_labels_documentation()
         await initialize_image_tag_preparation()
         yield

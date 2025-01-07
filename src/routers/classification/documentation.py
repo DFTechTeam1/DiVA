@@ -6,7 +6,7 @@ from services.postgres.connection import get_db
 from src.schema.response import ResponseDefault
 from src.schema.request_format import AllowedIpAddress
 from utils.query.general import find_record
-from utils.custom_errors import AccessUnauthorized, ServiceError, DatabaseQueryError
+from utils.custom_errors import AccessUnauthorized, ServiceError, DatabaseQueryError, DiVA
 from services.postgres.models import (
     CategoryDataDocumentation,
     ObjectDocumentationDetails,
@@ -17,7 +17,7 @@ from services.postgres.models import (
     CultureStyleDocumentationDetails,
 )
 
-router = APIRouter(tags=["Classification"])
+router = APIRouter(tags=["Classification"], prefix="/classification")
 
 
 async def labels_documentation(request: Request, db: Annotated[AsyncSession, Depends(get_db)]) -> ResponseDefault:
@@ -60,6 +60,8 @@ async def labels_documentation(request: Request, db: Annotated[AsyncSession, Dep
 
         response.message = "No documentation found."
 
+    except DiVA:
+        raise
     except DatabaseQueryError:
         raise
     except Exception as e:
@@ -69,7 +71,7 @@ async def labels_documentation(request: Request, db: Annotated[AsyncSession, Dep
 
 router.add_api_route(
     methods=["GET"],
-    path="/classification/docs",
+    path="/docs",
     endpoint=labels_documentation,
     summary="Retrieve label documentation.",
     status_code=status.HTTP_200_OK,

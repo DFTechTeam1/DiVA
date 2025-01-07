@@ -10,7 +10,7 @@ from services.postgres.models import ImageTag
 from utils.custom_errors import AccessUnauthorized, ServiceError, DatabaseQueryError, DataNotFoundError, DiVA
 
 
-router = APIRouter(tags=["Classification"])
+router = APIRouter(tags=["Classification"], prefix="/classification")
 
 
 async def labels_validator(
@@ -75,7 +75,7 @@ async def labels_validator(
 
 router.add_api_route(
     methods=["PATCH"],
-    path="/classification/validator/{image_id}",
+    path="/validator/{image_id}",
     endpoint=labels_validator,
     summary="Validate image labels.",
     status_code=status.HTTP_200_OK,
