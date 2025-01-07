@@ -3,7 +3,7 @@ from services.postgres.connection import database_connection
 from services.postgres.models import ImageTag
 from sqlalchemy import select, func
 from sqlalchemy.sql import and_
-from utils.custom_errors import DataNotFoundError, DatabaseQueryError
+from utils.custom_error import DataNotFoundError, DatabaseQueryError
 from src.schema.response import Pagination
 
 

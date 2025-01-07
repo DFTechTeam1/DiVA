@@ -4,7 +4,7 @@ import random
 
 from pathlib import Path
 from utils.helper import generate_random_word
-from utils.custom_errors import DataNotFoundError
+from utils.custom_error import DataNotFoundError
 from utils.helper import find_image_path
 
 

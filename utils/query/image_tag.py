@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.schema.request_format import AllowedIpAddress
 from utils.helper import find_image_path, extract_filename
-from utils.custom_errors import DatabaseQueryError, DataNotFoundError
+from utils.custom_error import DatabaseQueryError, DataNotFoundError
 from services.postgres.models import ImageTag
 from services.postgres.connection import database_connection
 from services.postgres.connection import get_db

@@ -1,6 +1,6 @@
 from utils.logger import logging
 from uuid import uuid4
-from utils.custom_errors import DatabaseQueryError, ServiceError, DiVA
+from utils.custom_error import DatabaseQueryError, ServiceError, DiVA
 from services.postgres.connection import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from utils.query.general import find_record, insert_record

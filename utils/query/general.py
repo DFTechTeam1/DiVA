@@ -1,5 +1,5 @@
 from utils.logger import logging
-from utils.custom_errors import DatabaseQueryError
+from utils.custom_error import DatabaseQueryError
 from typing import Literal
 from sqlmodel import SQLModel
 from sqlalchemy import select, update, insert

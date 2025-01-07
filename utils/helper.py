@@ -6,7 +6,7 @@ from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
 from utils.logger import logging
-from utils.custom_errors import DataNotFoundError
+from utils.custom_error import DataNotFoundError
 
 
 async def save_data(data: list, filename: str) -> None:

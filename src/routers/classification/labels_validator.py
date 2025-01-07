@@ -7,7 +7,7 @@ from src.schema.response import ResponseDefault
 from src.schema.request_format import LabelsValidator, AllowedIpAddress
 from utils.query.general import find_record, update_record
 from services.postgres.models import ImageTag
-from utils.custom_errors import AccessUnauthorized, ServiceError, DatabaseQueryError, DataNotFoundError, DiVA
+from utils.custom_error import AccessUnauthorized, ServiceError, DatabaseQueryError, DataNotFoundError, DiVA
 
 
 router = APIRouter(tags=["Classification"], prefix="/classification")

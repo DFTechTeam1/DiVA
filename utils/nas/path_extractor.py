@@ -11,7 +11,7 @@ from src.schema.request_format import (
     DeleteFolderNasApi,
     MoveFolderNasApi,
 )
-from utils.custom_errors import (
+from utils.custom_error import (
     NasIntegrationError,
     DataNotFoundError,
     ServicesConnectionError,

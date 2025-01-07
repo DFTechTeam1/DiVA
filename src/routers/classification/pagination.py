@@ -2,9 +2,9 @@ from utils.logger import logging
 from fastapi import APIRouter, status, Request, Query
 from src.schema.response import ResponseDefault
 from src.schema.request_format import AllowedIpAddress
-from utils.custom_errors import AccessUnauthorized
+from utils.custom_error import AccessUnauthorized
 from utils.query.pagination import extract_distributed_entries
-from utils.custom_errors import ServiceError, DiVA
+from utils.custom_error import ServiceError, DiVA
 
 router = APIRouter(tags=["Classification"], prefix="/classification")
 
