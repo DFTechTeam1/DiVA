@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Checking OS Environment
 echo "Checking OS Environment"
 if grep -qEi "(Microsoft|WSL)" /proc/version &>/dev/null; then
   echo "WSL detected"
@@ -12,7 +13,7 @@ else
       ;;
     cygwin* | msys* | mingw*)
       echo "Windows based OS detected"
-      source .venv/Scripts/activate
+      . .venv/Scripts/activate
       ;;
     *)
       echo "Unsupported OS detected. This feature is not developed yet."
@@ -21,14 +22,4 @@ else
   esac
 fi
 
-echo "Running tests"
-if ! coverage run -m --source=tests/ pytest tests/ --verbose; then
-  echo "Tests failed!"
-  exit 1
-fi
-
-echo "Generating coverage report"
-coverage report -m --skip-empty
-coverage html
-
-echo "Test finished"
+echo "Virtual environment activated!"
