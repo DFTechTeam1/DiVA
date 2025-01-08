@@ -1,6 +1,6 @@
 from utils.logger import logging
 from utils.custom_error import DatabaseQueryError
-from typing import Literal
+from typing import Literal, Any
 from sqlmodel import SQLModel
 from sqlalchemy import select, update, insert
 from sqlalchemy.engine.row import Row
@@ -8,11 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def find_record(
-    db: AsyncSession, table: type[SQLModel], fetch_type: Literal["one", "all"] = "one", **filters
+    db: AsyncSession, table: type[SQLModel], fetch_type: Literal["one", "all"] = "one", **kwargs: Any
 ) -> list[Row] | None:
     condition = []
 
-    for col, value in filters.items():
+    for col, value in kwargs.items():
         col_attr = getattr(table, col, None)
         if not col_attr:
             raise ValueError(f"Column {col} not found in {table.__tablename__} table!")

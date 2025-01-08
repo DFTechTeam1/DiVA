@@ -1,28 +1,31 @@
 #!/bin/sh
 
-echo "Checking OS Environment"
-if grep -qEi "(Microsoft|WSL)" /proc/version &>/dev/null; then
-  echo "WSL detected"
-  . .venv/bin/activate
+show_help() {
+  echo "Usage: $0 [--unit_test | --api_test | --help]"
+  echo ""
+  echo "Options:"
+  echo "  --unit_test    Run unit tests located in tests/unit_test"
+  echo "  --api_test     Run API tests located in tests/api_test"
+  echo "  --help         Show this help message"
+}
+
+if [ "$1" = "--help" ]; then
+  show_help
+  exit 0
+elif [ "$1" = "--unit_test" ]; then
+  TEST_DIR="tests/unit_test"
+elif [ "$1" = "--api_test" ]; then
+  TEST_DIR="tests/api_test"
 else
-  case "$OSTYPE" in
-    linux*)
-      echo "Linux based OS detected"
-      . .venv/bin/activate
-      ;;
-    cygwin* | msys* | mingw*)
-      echo "Windows based OS detected"
-      source .venv/Scripts/activate
-      ;;
-    *)
-      echo "Unsupported OS detected. This feature is not developed yet."
-      exit 1
-      ;;
-  esac
+  echo "Invalid option: $1"
+  show_help
+  exit 1
 fi
 
-echo "Running tests"
-if ! coverage run -m --source=tests/ pytest tests/ --verbose; then
+sh ./scripts/venv.sh
+
+echo "Running tests in $TEST_DIR"
+if ! coverage run -m --source=$TEST_DIR pytest $TEST_DIR --verbose; then
   echo "Tests failed!"
   exit 1
 fi
