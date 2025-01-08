@@ -8,8 +8,8 @@ config = Config()
 
 def database_connection(connection_type: Literal["sync", "async"] = "sync") -> AsyncEngine | Engine:
     if connection_type == "async":
-        return create_async_engine(url=config.ASYNC_PGSQL_CONNECTION, pool_size=20, max_overflow=0)
-    return create_engine(url=config.SYNC_PGSQL_CONNECTION, pool_pre_ping=True, pool_size=20, max_overflow=0)
+        return create_async_engine(url=config.ASYNC_PGSQL_CONNECTION)
+    return create_engine(url=config.SYNC_PGSQL_CONNECTION)
 
 
 async def get_db() -> AsyncSession:

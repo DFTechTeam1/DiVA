@@ -7,6 +7,11 @@ from collections import defaultdict
 from datetime import datetime
 from utils.logger import logging
 from utils.custom_error import DataNotFoundError
+from dotenv import load_dotenv
+
+
+def load_env_file(env_file="env/.env.development"):
+    return load_dotenv(dotenv_path=env_file)
 
 
 async def save_data(data: list, filename: str) -> None:

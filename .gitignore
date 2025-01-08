@@ -169,6 +169,3 @@ cython_debug/
 /cache/*
 .vscode
 /result*
-tes.py
-/models/*
-volumes/

@@ -20,7 +20,6 @@ async def test_labels_description_with_valid_page_parameters() -> None:
     params = {"page": 1}
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.get("/api/v1/classification/paginate", params=params)
-        print(res)
         response = res.json()
 
         assert res.status_code == 200
@@ -34,7 +33,6 @@ async def test_labels_description_with_valid_image_per_page_parameters() -> None
 
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.get("/api/v1/classification/paginate", params=params)
-        print(res)
         response = res.json()
 
         assert res.status_code == 200
