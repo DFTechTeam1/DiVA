@@ -32,6 +32,7 @@ torchvision = "^0.20.1"
 petname = "^2.6"
 opencv-python = "^4.10.0.84"
 pytest-cov = "^6.0.0"
+faker = "^33.3.0"
 
 
 [build-system]

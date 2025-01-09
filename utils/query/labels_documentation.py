@@ -380,7 +380,7 @@ async def insert_culture_styles_documentation(db: AsyncSession):
 async def initialize_labels_documentation() -> None:
     try:
         async for db in get_db():
-            category_record = await find_record(db=db, table=CategoryDataDocumentation)
+            category_record = await find_record(db=db, table=CategoryDataDocumentation, fetch_type="all")
             if not category_record:
                 logging.info("Initialized labels documentation.")
                 await insert_object_documentation(db=db)

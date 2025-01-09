@@ -7,11 +7,6 @@ from collections import defaultdict
 from datetime import datetime
 from utils.logger import logging
 from utils.custom_error import DataNotFoundError
-from dotenv import load_dotenv
-
-
-def load_env_file(env_file="env/.env.development"):
-    return load_dotenv(dotenv_path=env_file)
 
 
 async def save_data(data: list, filename: str) -> None:
@@ -31,41 +26,42 @@ async def save_data(data: list, filename: str) -> None:
     logging.info(f"Data successfully saved to {filepath}")
 
 
-def find_image_path(image_path: str = None) -> list | None:
+def find_image_path(image_path: str = None) -> list[str]:
     """
-    The function `find_image_path` takes an image path as input, checks if the directory exists, finds
-    image files with specific extensions in the directory, and returns a list of image paths.
+    Finds image files with specific extensions in the given directory.
 
-    :param image_path: The `image_path` parameter in the `find_image_path` function is a string that
-    represents the directory path where the images are located. By default, it is set to
-    "/project_utils/diva/client_preview". This function is designed to find all image files (with
-    extensions .jpg, .jpeg, defaults to /project_utils/diva/client_preview
-    :type image_path: str (optional)
-    :return: A list of image file paths is being returned by the `find_image_path` function.
+    :param image_path: Directory path where to search for images. Defaults to "/project_utils/diva/client_preview".
+    :type image_path: str, optional
+    :raises DataNotFoundError: If the directory does not exist or contains no images.
+    :return: A list of image file paths.
+    :rtype: list[str]
     """
-    home_path = Path.home()
-    default_path = Path(f"{home_path}/Project/utils/diva/client_preview")
-
     try:
-        if not os.path.exists(path=default_path):
+        # Use provided path or fall back to default
+        home_path = Path.home()
+        default_path = Path(f"{home_path}/Project/utils/diva/client_preview")
+        target_path = Path(image_path) if image_path else default_path
+
+        # Check if the directory exists
+        if not target_path.exists():
             raise DataNotFoundError(detail="Directory not found!")
 
+        # Search for image files
         image_extensions = {".jpg", ".jpeg", ".png"}
-
-        image_paths = [str(path) for path in Path(default_path).rglob("*") if path.suffix.lower() in image_extensions]
+        image_paths = [str(path) for path in target_path.rglob("*") if path.suffix.lower() in image_extensions]
 
         if not image_paths:
-            logging.error(f"[find_image_path] No image files found in {default_path}")
             raise DataNotFoundError(detail="No image found!")
 
         return image_paths
 
-    except DataNotFoundError:
+    except DataNotFoundError as e:
+        logging.error(f"[find_image_path] {e.detail}")
         raise
-    except Exception as e:
-        logging.error(f"[find_image_path] Exception error raised: {e}")
 
-    return None
+    except Exception as e:
+        logging.error(f"[find_image_path] Unexpected exception: {e}")
+        raise
 
 
 def extract_filename(filepaths: list) -> list:

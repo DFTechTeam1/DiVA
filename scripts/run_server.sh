@@ -1,16 +1,24 @@
 #!/bin/sh
 
-# Default host value
+# Default value
 HOST="127.0.0.1"
-ENV_FILE="env/.env.development"  # Default to development environment
+ENV_FILE="env/.env.development"
+
+# Checking for existing processes on port 8000
+echo "Checking for existing processes on port 8000"
+PIDS=$(lsof -ti :8000)
+if [ -n "$PIDS" ]; then
+  echo "Killing existing processes on port 8000"
+  kill -9 $PIDS
+fi
 
 # Show usage information
 show_help() {
-  echo "Usage: $0 [--development | --production | --test | --help]"
+  echo "Usage: sh $0 [ --development | --staging | --production | --help ]"
   echo ""
   echo "--development    Run the server on localhost and load the .env.development file"
-  echo "--production     Run the server on the current machine IP address and load the .env.production file"
-  echo "--testing        Run the server on localhost and load the .env.testing file"
+  echo "--staging        Run the server on the staging IP and load the .env.staging file"
+  echo "--production     Run the server on the production IP address and load the .env.production file"
   echo "--help           Show this help message"
 }
 
@@ -27,6 +35,16 @@ case "$1" in
     ENV_FILE="env/.env.development"
     HOST="127.0.0.1"
     ;;
+  --staging)
+    echo "Using staging environment configuration"
+    ENV_FILE="env/.env.staging"
+    CURRENT_IP=$(hostname -I | awk '{print $1}')
+    if [ -z "$CURRENT_IP" ]; then
+      echo "Unable to detect current IP address! Using default host"
+    else
+      HOST="$CURRENT_IP"
+    fi
+    ;;
   --production)
     echo "Using production environment configuration"
     CURRENT_IP=$(hostname -I | awk '{print $1}')
@@ -37,11 +55,6 @@ case "$1" in
     fi
     ENV_FILE="env/.env.production"
     ;;
-  --testing)
-    echo "Using testing environment configuration"
-    ENV_FILE="env/.env.testing"
-    HOST="127.0.0.1"
-    ;;
   *)
     echo "Invalid option: $1"
     show_help
@@ -49,17 +62,13 @@ case "$1" in
     ;;
 esac
 
-# Load the environment variables from the selected .env file
-echo "Loading environment variables from $ENV_FILE"
+#Load the environment variables using the external script
 export $(grep -v '^#' $ENV_FILE | xargs)
+sh ./scripts/load_env.sh
 
-# Call your clean and venv scripts
-sh ./scripts/clean_port.sh --8000
-sh ./scripts/venv.sh
+# Activate virtualenv
+sh ./scripts/activate.sh
 
-# Ensure the environment file is passed to secret.py (dynamically load environment variables)
-echo "Loading environment variables in secret.py"
-python -c "from utils.helper import load_env_file; load_env_file('$ENV_FILE')"
-
+# Start the server
 echo "Running uvicorn server in debug mode"
 uvicorn src.main:app --host "$HOST" --port 8000 --reload --reload-dir=src
