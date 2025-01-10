@@ -1,33 +1,15 @@
 import pytest
-from sqlmodel import SQLModel, Field
 from uuid import uuid4
 from faker import Faker
 from sqlalchemy.engine.row import Row
 from services.postgres.connection import get_db
-from utils.custom_error import DatabaseQueryError
+from utils.custom_error import DatabaseQueryError, DataNotFoundError
 from services.postgres.models import CategoryDataDocumentation
 from utils.query.general import find_record, delete_record, insert_record, update_record
 
 
-class NonExistentTable(SQLModel, table=True):
-    id: int = Field(primary_key=True)
-    category: str = Field(default=None)
-
-
-# @pytest.mark.asyncio
-# async def test_update_record_with_empty_data_inside_table():
-#     async for db in get_db():
-#         with pytest.raises(DataNotFoundError, match="Data not found"):
-#             await update_record(
-#                 db=db,
-#                 table=CategoryDataDocumentation,
-#                 conditions={"id": str(uuid4())},
-#                 data={"category": "NonExistentCategory"}
-#             )
-
-
 @pytest.mark.asyncio
-async def test_update_record_with_available_data():
+async def test_update_record_with_available_data_inside_table():
     faker = Faker()
     unique_id = str(uuid4())
     old_category = faker.color_name()
@@ -56,8 +38,7 @@ async def test_update_record_with_available_data():
 
 
 @pytest.mark.asyncio
-async def test_update_record_with_empty_conditions():
-    """Test updating a record with empty conditions."""
+async def test_update_record_with_empty_conditions_parameters():
     faker = Faker()
     async for db in get_db():
         with pytest.raises(ValueError, match="Conditions cannot be empty"):
@@ -65,8 +46,7 @@ async def test_update_record_with_empty_conditions():
 
 
 @pytest.mark.asyncio
-async def test_update_record_with_empty_data_payload():
-    """Test updating a record with empty conditions."""
+async def test_update_record_with_empty_data_parameters():
     faker = Faker()
     unique_id = str(uuid4())
     old_category = faker.color_name()
@@ -82,19 +62,19 @@ async def test_update_record_with_empty_data_payload():
 
 
 @pytest.mark.asyncio
-async def test_update_record_raised_value_error():
+async def test_update_record_with_random_conditions():
+    faker = Faker()
+    random_key = faker.city_prefix()
+    random_value = faker.city_prefix()
     async for db in get_db():
-        with pytest.raises(ValueError):
-            await update_record(
-                db=db,
-                table=CategoryDataDocumentation,
-                conditions={"unique_id": str(uuid4())},
-                data={"invalid_column": "invalid_value"},
-            )
+        with pytest.raises(
+            ValueError, match=f"Column {random_key} not found in {CategoryDataDocumentation.__tablename__} table!"
+        ):
+            await update_record(db=db, table=CategoryDataDocumentation, conditions={random_key: random_value}, data={})
 
 
 @pytest.mark.asyncio
-async def test_update_record_raised_exception_error():
+async def test_update_record_raised_database_query_error():
     faker = Faker()
     async for db in get_db():
         with pytest.raises(DatabaseQueryError):
@@ -104,10 +84,12 @@ async def test_update_record_raised_exception_error():
 
 
 @pytest.mark.asyncio
-async def test_update_record_with_nonexistent_table():
-    """Test updating a record in a non-existent table."""
+async def test_update_record_raised_data_not_found_error():
     async for db in get_db():
-        with pytest.raises(DatabaseQueryError, match="Table does not exist."):
+        with pytest.raises(DataNotFoundError, match="Data not found"):
             await update_record(
-                db=db, table=NonExistentTable, conditions={"id": str(uuid4())}, data={"category": "NonExistentCategory"}
+                db=db,
+                table=CategoryDataDocumentation,
+                conditions={"unique_id": str(uuid4())},
+                data={"category": "NonExistentCategory"},
             )

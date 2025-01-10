@@ -13,10 +13,15 @@ else:
 
 
 class Config:
-    NAS_IP = os.getenv("NAS_IP")
-    NAS_PORT = os.getenv("NAS_PORT")
     NAS_USERNAME = os.getenv("NAS_USERNAME")
     NAS_PASSWORD = os.getenv("NAS_PASSWORD")
+    NAS_PORT_1 = os.getenv("NAS_PORT_1")
+    NAS_PORT_2 = os.getenv("NAS_PORT_2")
+    NAS_IP_1 = os.getenv("NAS_IP_1")
+    NAS_IP_2 = os.getenv("NAS_IP_2")
+    NAS_IP_3 = os.getenv("NAS_IP_3")
+    NAS_IP_4 = os.getenv("NAS_IP_4")
+    NAS_IP_5 = os.getenv("NAS_IP_5")
     PGADMIN_EMAIL = os.getenv("PGADMIN_EMAIL")
     PGADMIN_PASSWORD = os.getenv("PGADMIN_PASSWORD")
     POSTGRESQL_USER = os.getenv("POSTGRESQL_USER")
@@ -33,6 +38,5 @@ class Config:
     ASYNC_PGSQL_CONNECTION = (
         f"postgresql+asyncpg://{POSTGRESQL_USER}:{POSTGRESQL_PASSWORD}@{POSTGRESQL_HOST}/{POSTGRESQL_DATABASE}"
     )
-    print(ASYNC_PGSQL_CONNECTION)
     PGSQL_BACKEND = f"db+postgresql://{POSTGRESQL_USER}:{POSTGRESQL_PASSWORD}@{POSTGRESQL_HOST}:5432/{POSTGRESQL_DATABASE}"
     BROKER_URL = f"amqp://{RABBITMQ_DEFAULT_USER}:{RABBITMQ_DEFAULT_PASS}@{RABBITMQ_DEFAULT_HOST}"

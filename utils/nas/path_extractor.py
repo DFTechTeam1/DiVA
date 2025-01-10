@@ -1,5 +1,6 @@
 import json
 import httpx
+from typing import Union
 from utils.logger import logging
 from src.secret import Config
 from src.schema.request_format import (
@@ -20,10 +21,9 @@ from utils.custom_error import (
 
 def port_matcher(ip_address: str) -> str:
     config = Config()
-    port = config.NAS_PORT.split(",")
     if ip_address == "192.168.100.101":
-        return port[-1].strip()
-    return port[0].strip()
+        return config.NAS_PORT_2
+    return config.NAS_PORT_1
 
 
 def grab_shared_dir(path: str | list[str]) -> str | None:
@@ -131,15 +131,13 @@ async def check_shared_folder_already_exist(connection_id: str, ip_address: str,
 
     async with httpx.AsyncClient() as client:
         try:
-            logging.info("[check_shared_folder_already_exist] Validate shared folder already on NAS via API.")
+            logging.info("Validate shared folder already on NAS via API.")
             response = await client.get(NAS_BASE_URL, params=params.model_dump())
             response.raise_for_status()
             data = response.json()
 
-            if not data.get("success"):
-                logging.error(
-                    "[check_shared_folder_already_exist] Checking shared folder failed, please ensure request are appropriate."
-                )
+            if not data["success"]:
+                logging.error("Checking shared folder failed, please ensure request are appropriate.")
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
@@ -148,7 +146,7 @@ async def check_shared_folder_already_exist(connection_id: str, ip_address: str,
 
             if not is_available:
                 raise DataNotFoundError(
-                    detail="Shared directory not found. Please please ensure shared directory already created on NAS."
+                    detail="Shared directory not found. " "Please please ensure shared directory already created on NAS."
                 )
         except NasIntegrationError:
             raise
@@ -161,30 +159,38 @@ async def check_shared_folder_already_exist(connection_id: str, ip_address: str,
     return None
 
 
-async def check_target_dir_already_exist(connection_id: str, ip_address: str, shared_folder: str, target_folder: str) -> None:
-    params = ListShareNasApi(
-        api="SYNO.FileStation.List",
-        version=2,
-        method="list",
-        _sid=connection_id,
-        folder_path=shared_folder + "/" + target_folder,
-    )
-
+async def check_target_dir_already_exist(
+    connection_id: str, ip_address: str, shared_folder: str, target_folder: str | list
+) -> Union[dict, list[dict]]:
     port = port_matcher(ip_address=ip_address)
 
     NAS_BASE_URL = f"http://{ip_address}:{port}/webapi/auth.cgi"
 
+    if isinstance(target_folder, str):
+        target_folder = [target_folder]
+
+    responses = []
+
     async with httpx.AsyncClient() as client:
-        try:
-            logging.info("[check_target_dir_already_exist] Validate target folder already on NAS via API.")
-            response = await client.get(NAS_BASE_URL, params=params.model_dump())
-            response.raise_for_status()
-            data = response.json()
-        except Exception as e:
-            logging.error(f"[check_shared_folder_already_exist] Cannot initialize NAS connection: {e}")
-        finally:
-            await client.aclose()
-        return data
+        for folder in target_folder:
+            params = ListShareNasApi(
+                api="SYNO.FileStation.List",
+                version=2,
+                method="list",
+                _sid=connection_id,
+                folder_path=f"{shared_folder}/{folder}",
+            )
+            try:
+                logging.info(f"[check_target_dir_already_exist] Checking folder: {folder}")
+                response = await client.get(NAS_BASE_URL, params=params.model_dump())
+                response.raise_for_status()
+                data = response.json()
+                responses.append(data)
+            except Exception as e:
+                logging.error(f"[check_target_dir_already_exist] Error checking folder '{folder}': {e}")
+                responses.append({"error": str(e), "folder": folder})
+
+    return responses if len(responses) > 1 else responses[0]
 
 
 async def create_nas_dir(

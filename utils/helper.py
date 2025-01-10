@@ -2,6 +2,7 @@ import os
 import string
 import csv
 import random
+from src.secret import Config
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
@@ -27,15 +28,6 @@ async def save_data(data: list, filename: str) -> None:
 
 
 def find_image_path(image_path: str = None) -> list[str]:
-    """
-    Finds image files with specific extensions in the given directory.
-
-    :param image_path: Directory path where to search for images. Defaults to "/project_utils/diva/client_preview".
-    :type image_path: str, optional
-    :raises DataNotFoundError: If the directory does not exist or contains no images.
-    :return: A list of image file paths.
-    :rtype: list[str]
-    """
     try:
         # Use provided path or fall back to default
         home_path = Path.home()
@@ -65,16 +57,6 @@ def find_image_path(image_path: str = None) -> list[str]:
 
 
 def extract_filename(filepaths: list) -> list:
-    """
-    The function `extract_filename` takes a list of filepaths and returns a list of filenames by
-    extracting the last part of each filepath after the last '/' character.
-
-    :param filepaths: A list of file paths that you want to extract the filenames from
-    :type filepaths: list
-    :return: The function `extract_filename` takes a list of filepaths as input and returns a list of
-    filenames extracted from the filepaths by splitting them at the "/" character and taking the last
-    element.
-    """
     return [filename.split("/")[-1] for filename in filepaths]
 
 
@@ -82,18 +64,14 @@ def local_time() -> datetime:
     return datetime.now()
 
 
-def generate_random_word(length: int = 4) -> str:
-    """
-    The function `generate_random_word` creates a random word of a specified length using lowercase
-    letters.
+def port_matcher(ip_address: str) -> str:
+    config = Config()
+    if ip_address == "192.168.100.101":
+        return config.NAS_PORT_2
+    return config.NAS_PORT_1
 
-    :param length: The `length` parameter in the `generate_random_word` function specifies the length of
-    the random word that will be generated. By default, if no length is provided, the function will
-    generate a random word of length 4. You can also specify a custom length if you want a word of a,
-    defaults to 4
-    :type length: int (optional)
-    :return: A random word consisting of lowercase letters with the specified length is being returned.
-    """
+
+def generate_random_word(length: int = 4) -> str:
     if length < 1:
         raise ValueError("length parameter should be more than 0")
 

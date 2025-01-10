@@ -1,11 +1,10 @@
 from utils.logger import logging
-from sqlalchemy.exc import NoSuchTableError, ProgrammingError
 from typing import Literal, Any
 from sqlmodel import SQLModel
 from sqlalchemy import select, update, insert, delete
 from sqlalchemy.engine.row import Row
 from sqlalchemy.ext.asyncio import AsyncSession
-from utils.custom_error import DatabaseQueryError
+from utils.custom_error import DatabaseQueryError, DataNotFoundError
 
 
 async def find_record(
@@ -35,9 +34,6 @@ async def find_record(
         else:
             entry = result.fetchone()
             return entry
-    except NoSuchTableError:
-        logging.error(f"Table {table.__name__} does not exist.")
-        raise DatabaseQueryError(detail="Table does not exist.")
     except Exception as e:
         logging.error(f"Failed to find record in table {table.__name__}: {e}")
         await db.rollback()
@@ -45,32 +41,36 @@ async def find_record(
 
 
 async def update_record(db: AsyncSession, table: type[SQLModel], conditions: dict, data: dict) -> None:
-    if not conditions:
-        raise ValueError("Conditions cannot be empty")
-
-    if not data:
-        raise ValueError("Data must be a non-empty dictionary.")
-
-    for column in data.keys():
-        if not hasattr(table, column):
-            raise ValueError(f"Column '{column}' not found in {table.__name__} table!")
-
-    for column in conditions.keys():
-        if not hasattr(table, column):
-            raise ValueError(f"Column '{column}' not found in {table.__name__} table!")
+    target_records = await find_record(db=db, table=table, **conditions)
 
     try:
+        if not conditions:
+            raise ValueError("Conditions cannot be empty")
+
+        if not data:
+            raise ValueError("Data must be a non-empty dictionary.")
+
+        if not target_records:
+            raise DataNotFoundError("Data not found.")
+
+        for column in data.keys():
+            if not hasattr(table, column):
+                raise ValueError(f"Column {column} not found in {table.__tablename__} table!")
+
+        for column in conditions.keys():
+            if not hasattr(table, column):
+                raise ValueError(f"Column {column} not found in {table.__tablename__} table!")
+
         query = update(table).where(*(getattr(table, column) == value for column, value in conditions.items())).values(**data)
         await db.execute(query)
         await db.commit()
         logging.info(f"Updated record in table {table.__name__}.")
-    except ProgrammingError as e:
-        logging.error(f"Failed to update record in table {table.__name__} with conditions {conditions}: {e}")
-        await db.rollback()
-        raise DatabaseQueryError(detail="Table does not exist.")
+    except ValueError:
+        raise
+    except DataNotFoundError:
+        raise
     except Exception as e:
         logging.error(f"Failed to update record in table {table.__name__} with conditions {conditions}: {e}")
-        await db.rollback()
         raise DatabaseQueryError(detail="Database query error.")
     return None
 
