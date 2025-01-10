@@ -4,10 +4,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.schema.request_format import AllowedIpAddress
 from utils.helper import find_image_path, extract_filename
-from utils.custom_errors import DatabaseQueryError, DataNotFoundError
+from utils.custom_error import DatabaseQueryError, DataNotFoundError
 from services.postgres.models import ImageTag
 from services.postgres.connection import database_connection
-from utils.query.labels_documentation import validate_data_availability
+from services.postgres.connection import get_db
+from utils.query.general import find_record
 
 
 async def insert_image_tag_entry(
@@ -42,9 +43,7 @@ async def insert_image_tag_entry(
         start_index = end_index
 
     async_engine = database_connection(connection_type="async")
-    async_session = sessionmaker(
-        bind=async_engine, class_=AsyncSession, expire_on_commit=False
-    )
+    async_session = sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False)
 
     async with async_session() as session:
         try:
@@ -61,17 +60,20 @@ async def insert_image_tag_entry(
             await session.close()
 
 
-async def initialize_image_tag_preparation():
-    is_available = await validate_data_availability(table_model=ImageTag)
-    if not is_available:
+async def initialize_image_tag_preparation() -> None:
+    async for db in get_db():
+        image_tag_record = await find_record(db=db, table=ImageTag)
+        break
+    if not image_tag_record:
         filepaths = find_image_path()
         filenames = extract_filename(filepaths=filepaths)
         await insert_image_tag_entry(filepaths=filepaths, filenames=filenames)
+    else:
+        logging.info("Image tag already initialized")
+    return None
 
 
-def extract_image_tag_entries(
-    is_validated: bool = True, is_trained: bool = False
-) -> list:
+def extract_image_tag_entries(is_validated: bool = True, is_trained: bool = False) -> list:
     with database_connection().connect() as session:
         try:
             query = (
@@ -85,9 +87,7 @@ def extract_image_tag_entries(
             execute = session.execute(query)
             rows = execute.fetchall()
             if not rows:
-                logging.warning(
-                    "[extract_validated_image_tag] No validated data entry!"
-                )
+                logging.warning("[extract_validated_image_tag] No validated data entry!")
 
             return [dict(row._mapping) for row in rows]
         except DataNotFoundError:
@@ -95,9 +95,7 @@ def extract_image_tag_entries(
         except DatabaseQueryError:
             raise
         except Exception as e:
-            logging.error(
-                f"[extract_validated_image_tag] Error retrieving all entry: {e}"
-            )
+            logging.error(f"[extract_validated_image_tag] Error retrieving all entry: {e}")
             session.rollback()
             raise DatabaseQueryError(detail="Invalid database query")
         finally:
@@ -112,18 +110,12 @@ def update_image_tag_is_trained(entries: list[dict]) -> None:
                 logging.warning("[update_image_tag_is_trained] No entries to update!")
                 return
 
-            query = (
-                update(ImageTag)
-                .where(ImageTag.id.in_(ids_to_update))
-                .values(is_trained=True)
-            )
+            query = update(ImageTag).where(ImageTag.id.in_(ids_to_update)).values(is_trained=True)
 
             session.execute(query)
             session.commit()
 
-            logging.info(
-                f"[update_image_tag_is_trained] Updated {len(ids_to_update)} entries successfully."
-            )
+            logging.info(f"[update_image_tag_is_trained] Updated {len(ids_to_update)} entries successfully.")
         except Exception as e:
             logging.error(f"[update_image_tag_is_trained] Error updating entries: {e}")
             session.rollback()

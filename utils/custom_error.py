@@ -1,4 +1,4 @@
-import logging
+from utils.logger import logging
 from typing import Callable
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -15,9 +15,7 @@ class DiVA(Exception):
         super().__init__(self.detail, self.name)
 
 
-def create_exception_handler(
-    status_code: int, detail_message: str
-) -> Callable[[Request, DiVA], JSONResponse]:
+def create_exception_handler(status_code: int, detail_message: str) -> Callable[[Request, DiVA], JSONResponse]:
     detail = {"message": detail_message}
 
     async def exception_handler(_: Request, exc: DiVA) -> JSONResponse:

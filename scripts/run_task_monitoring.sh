@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Ensure celery worker file exists
 CELERY_WORKER="$PWD/services/celery/worker.py"
