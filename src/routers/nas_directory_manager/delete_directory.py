@@ -1,56 +1,55 @@
-# import os
-# from utils.logger import logging
-# from fastapi import APIRouter, status
-# from src.schema.response import ResponseDefault
-# from src.schema.request_format import NasDeleteDirectory
-# from utils.nas.path_extractor import (
-#     login_nas,
-#     logout_nas,
-#     check_shared_folder_already_exist,
-#     delete_nas_dir,
-# )
+from utils.logger import logging
+from fastapi import APIRouter, status
+from src.schema.response import ResponseDefault, DirectoryStatus
+from src.schema.request_format import NasDeleteDirectory
+from utils.custom_error import ServiceError, DiVA
+from utils.nas.external import (
+    auth_nas,
+    validate_directory,
+    delete_nas_dir,
+)
 
-# router = APIRouter(tags=["Directory Management"])
-
-
-# async def delete_nas_directory(schema: NasDeleteDirectory) -> ResponseDefault:
-#     logging.info("Endpoint Delete NAS Directory.")
-#     response = ResponseDefault()
-
-#     BASE_PATH = f"{schema.ip_address}{schema.folder_path}"
-#     response.message = f"Deleted a directory in {BASE_PATH}"
-
-#     if isinstance(schema.folder_path, list) and len(schema.folder_path) > 1:
-#         common_path = os.path.commonpath(schema.folder_path)
-#         response.message = f"Deleted multiple directory on {schema.ip_address}{common_path}"
-#     if isinstance(schema.folder_path, list) and len(schema.folder_path) == 1:
-#         common_path = os.path.commonpath(schema.folder_path)
-#         response.message = f"Deleted a directory in {schema.ip_address}{common_path}"
-
-#     conn_id = await login_nas(ip_address=schema.ip_address)
-
-#     await check_shared_folder_already_exist(
-#         connection_id=conn_id,
-#         ip_address=schema.ip_address,
-#         folder_path=schema.folder_path,
-#     )
-
-#     await delete_nas_dir(
-#         connection_id=conn_id,
-#         ip_address=schema.ip_address,
-#         folder_path=schema.folder_path,
-#     )
-
-#     await logout_nas(ip_address=schema.ip_address)
-
-#     return response
+router = APIRouter(tags=["Directory Management"])
 
 
-# router.add_api_route(
-#     methods=["POST"],
-#     path="/nas/delete-dir",
-#     endpoint=delete_nas_directory,
-#     summary="Delete existing directory on NAS.",
-#     status_code=status.HTTP_200_OK,
-#     response_model=ResponseDefault,
-# )
+async def delete_nas_directory_endpoint(schema: NasDeleteDirectory) -> ResponseDefault:
+    response = ResponseDefault()
+
+    sid = await auth_nas(ip_address=schema.ip_address)
+    new_dir, existing_dir = await validate_directory(
+        ip_address=schema.ip_address,
+        directory_path=[schema.target_folder] if type(schema.target_folder) is str else schema.target_folder,
+        sid=sid,
+    )
+    try:
+        if not existing_dir:
+            response.message = "Input should be existing directory on NAS."
+            response.data = DirectoryStatus(non_existing_folder=new_dir)
+            return response
+
+        logging.info("Endpoint delete NAS directory.")
+        await delete_nas_dir(ip_address=schema.ip_address, folder_path=existing_dir, sid=sid)
+
+        response.message = "Directory successfully removed."
+        response.data = DirectoryStatus(non_existing_folder=new_dir)
+    except DiVA:
+        raise
+    except ValueError:
+        raise
+    except Exception as e:
+        logging.error(f"Error delete NAS directory: {e}")
+        raise ServiceError(detail="Failed to delete directory into NAS.", name="DiVA")
+    finally:
+        await auth_nas(ip_address=schema.ip_address, auth_type="logout")
+
+    return response
+
+
+router.add_api_route(
+    methods=["POST"],
+    path="/nas/delete-dir",
+    endpoint=delete_nas_directory_endpoint,
+    summary="Delete existing directory on NAS.",
+    status_code=status.HTTP_200_OK,
+    response_model=ResponseDefault,
+)

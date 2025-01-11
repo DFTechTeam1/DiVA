@@ -28,17 +28,23 @@ class AllowedIpAddress(BaseModel):
     ]
 
 
-class NasDirectoryManagement(IpAddress):
-    folder_path: str | list[str] = None
-    directory_name: str | list[str] = None
+class NasFolderPath(BaseModel):
+    target_folder: str | list[str] = None
 
 
-class NasDeleteDirectory(IpAddress):
-    folder_path: str | list[str] = None
+class NasDirectoryManagement(NasFolderPath, IpAddress):
+    shared_folder: str | list[str] = None
 
 
-class NasMoveDirectory(IpAddress):
-    path: str | list[str] = None
+class NasDeleteDirectory(NasFolderPath, IpAddress):
+    pass
+
+
+class NasUpdateDirectory(NasFolderPath, IpAddress):
+    changed_name_into: str | list = None
+
+
+class NasMoveDirectory(NasFolderPath, IpAddress):
     dest_folder_path: str | list[str] = None
 
 

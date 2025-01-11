@@ -1,29 +1,45 @@
 from utils.logger import logging
 from fastapi import APIRouter, status
-from src.schema.response import ResponseDefault
+from src.schema.response import ResponseDefault, DirectoryStatus
 from src.schema.request_format import NasDirectoryManagement
 from utils.custom_error import ServiceError, DiVA
-from utils.nas import auth_nas
+from utils.nas.validator import (
+    validate_shared_folder,
+    path_formatter,
+    decode_path_formatter,
+)
+from utils.nas.external import (
+    auth_nas,
+    extract_shared_folder,
+    validate_directory,
+    create_nas_dir,
+)
 
 router = APIRouter(tags=["Directory Management"])
 
 
-async def create_nas_directory(schema: NasDirectoryManagement) -> ResponseDefault:
+async def create_nas_directory_endpoint(schema: NasDirectoryManagement) -> ResponseDefault:
     response = ResponseDefault()
 
-    # BASE_PATH = f"{schema.ip_address}{schema.folder_path}"
-    # message = f"Created new directory in {BASE_PATH}"
+    formated_path = path_formatter(shared_folder=schema.shared_folder, target_folder=schema.target_folder)
+    sid = await auth_nas(ip_address=schema.ip_address)
+    new_dir, existing_dir = await validate_directory(ip_address=schema.ip_address, directory_path=formated_path, sid=sid)
 
-    # if isinstance(schema.folder_path, list) and len(schema.folder_path) > 1:
-    #     common_path = os.path.commonpath(schema.folder_path)
-    #     message = f"Created multiple directory on {schema.ip_address}{common_path}"
-    # if isinstance(schema.folder_path, list) and len(schema.folder_path) == 1:
-    #     common_path = os.path.commonpath(schema.folder_path)
-    #     message = f"Created a directory in {schema.ip_address}{common_path}"
     try:
+        if not new_dir:
+            response.message = "Directory already exist."
+            response.data = DirectoryStatus(folder_already_exsist=existing_dir)
+            return response
+
+        shared_folder = await extract_shared_folder(ip_address=schema.ip_address, sid=sid)
+        validate_shared_folder(shared_folder=shared_folder, target_shared_folder=schema.shared_folder)
+
         logging.info("Endpoint create NAS directory.")
-        sid = await auth_nas(ip_address=schema.ip_address)
-        print(sid)
+        shared_folder, target_folder = decode_path_formatter(paths=new_dir)
+        await create_nas_dir(ip_address=schema.ip_address, shared_folder=shared_folder, target_folder=target_folder, sid=sid)
+
+        response.message = "Directory created successfully."
+        response.data = DirectoryStatus(folder_already_exsist=existing_dir)
     except DiVA:
         raise
     except Exception as e:
@@ -32,42 +48,13 @@ async def create_nas_directory(schema: NasDirectoryManagement) -> ResponseDefaul
     finally:
         await auth_nas(ip_address=schema.ip_address, auth_type="logout")
 
-    # await check_shared_folder_already_exist(
-    #     connection_id=conn_id,
-    #     ip_address=schema.ip_address,
-    #     folder_path=schema.folder_path,
-    # )
-    # is_available = await check_target_dir_already_exist(
-    #     connection_id=conn_id,
-    #     ip_address=schema.ip_address,
-    #     shared_folder=schema.folder_path,
-    #     target_folder=schema.directory_name,
-    # )
-
-    # print(is_available)
-
-    # if is_available["success"]:
-    #     await logout_nas(ip_address=schema.ip_address)
-    #     response.message = f"Directory {schema.folder_path+"/"+schema.directory_name} already exist."
-    #     return response
-
-    # await create_nas_dir(
-    #     connection_id=conn_id,
-    #     ip_address=schema.ip_address,
-    #     folder_path=schema.folder_path,
-    #     directory_name=schema.directory_name,
-    # )
-    # await logout_nas(ip_address=schema.ip_address)
-
-    # response.message = message
-
     return response
 
 
 router.add_api_route(
     methods=["POST"],
     path="/nas/create-dir",
-    endpoint=create_nas_directory,
+    endpoint=create_nas_directory_endpoint,
     summary="Create new directory on NAS.",
     status_code=status.HTTP_200_OK,
     response_model=ResponseDefault,

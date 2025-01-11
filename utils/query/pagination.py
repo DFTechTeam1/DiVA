@@ -44,9 +44,6 @@ async def extract_distributed_entries(page: int, image_per_page: int, ip_address
             rows = result.fetchall()
             result = [dict(row._mapping) for row in rows]
 
-            if not result:
-                result = None
-
             response.available_page = total_page
             response.images = result
 
