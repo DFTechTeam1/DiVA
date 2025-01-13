@@ -12,7 +12,7 @@ async def test_insert_record_with_single_data():
     faker = Faker()
     unique_id = str(uuid4())
     category = faker.color_name()
-    description = faker.address()
+    description = faker.name()
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
         await insert_record(
@@ -35,9 +35,9 @@ async def test_insert_record_with_single_data():
 async def test_insert_record_with_multi_data():
     faker = Faker()
     records_to_insert = [
-        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.address()},
-        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.address()},
-        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.address()},
+        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.name()},
+        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.name()},
+        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.name()},
     ]
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)

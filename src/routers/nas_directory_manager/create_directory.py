@@ -27,6 +27,7 @@ async def create_nas_directory_endpoint(schema: NasDirectoryManagement) -> Respo
 
     try:
         if not new_dir:
+            """Response given if all directory creation is already exsist on NAS"""
             response.message = "Directory already exist."
             response.data = DirectoryStatus(folder_already_exsist=existing_dir)
             return response
@@ -39,7 +40,7 @@ async def create_nas_directory_endpoint(schema: NasDirectoryManagement) -> Respo
         await create_nas_dir(ip_address=schema.ip_address, shared_folder=shared_folder, target_folder=target_folder, sid=sid)
 
         response.message = "Directory created successfully."
-        response.data = DirectoryStatus(folder_already_exsist=existing_dir)
+        response.data = DirectoryStatus(folder_already_exsist=existing_dir, non_existing_folder=new_dir)
     except DiVA:
         raise
     except Exception as e:

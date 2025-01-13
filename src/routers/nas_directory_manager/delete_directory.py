@@ -31,7 +31,7 @@ async def delete_nas_directory_endpoint(schema: NasDeleteDirectory) -> ResponseD
         await delete_nas_dir(ip_address=schema.ip_address, folder_path=existing_dir, sid=sid)
 
         response.message = "Directory successfully removed."
-        response.data = DirectoryStatus(non_existing_folder=new_dir)
+        response.data = DirectoryStatus(non_existing_folder=new_dir, folder_already_exsist=existing_dir)
     except DiVA:
         raise
     except ValueError:

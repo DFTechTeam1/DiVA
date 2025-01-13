@@ -60,7 +60,7 @@ async def test_labels_description_with_invalid_page_parameters() -> None:
         response = res.json()
 
         assert res.status_code == 200
-        assert response["data"]["images"] is None
+        assert response["data"]["images"] == []
 
 
 @pytest.mark.asyncio
@@ -74,4 +74,4 @@ async def test_labels_description_with_all_invalid_parameters() -> None:
 
         assert res.status_code == 200
         assert response["data"]["available_page"] == 1
-        assert response["data"]["images"] is None
+        assert response["data"]["images"] == []

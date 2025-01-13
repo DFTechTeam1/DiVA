@@ -273,3 +273,38 @@ async def move_nas_dir(
         finally:
             await client.aclose()
     return None
+
+
+async def list_existing_directory(ip_address: str, directory_path: str, sid: str) -> Optional[list]:
+    port = port_matcher(ip_address=ip_address)
+    NAS_BASE_URL = f"http://{ip_address}:{port}/webapi/auth.cgi"
+    params = {"api": "SYNO.FileStation.List", "version": 2, "method": "list", "folder_path": directory_path, "_sid": sid}
+
+    async with httpx.AsyncClient() as client:
+        try:
+            logging.info(f"Validating path {directory_path}.")
+            response = await client.get(NAS_BASE_URL, params=params)
+            response.raise_for_status()
+            data = response.json()
+
+            return data["data"]["files"]
+        except NasIntegrationError:
+            raise
+        except ServicesConnectionError:
+            raise
+        except Exception as e:
+            logging.error(f"Cannot validate dirctory: {e}")
+        finally:
+            await client.aclose()
+
+    return None
+
+
+async def list_folder(ip_address: str, directory_path: str) -> dict:
+    """Used as api testing"""
+    try:
+        sid = await auth_nas(ip_address=ip_address)
+        existing_dir = await list_existing_directory(ip_address=ip_address, directory_path=directory_path, sid=sid)
+    finally:
+        await auth_nas(ip_address=ip_address)
+    return existing_dir

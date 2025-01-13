@@ -169,3 +169,4 @@ cython_debug/
 /cache/*
 .vscode
 /result*
+/assets

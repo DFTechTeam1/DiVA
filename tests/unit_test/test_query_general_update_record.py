@@ -14,8 +14,8 @@ async def test_update_record_with_available_data_inside_table():
     unique_id = str(uuid4())
     old_category = faker.color_name()
     new_category = faker.color_name()
-    old_desc = faker.address()
-    new_desc = faker.address()
+    old_desc = faker.name()
+    new_desc = faker.name()
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
         await insert_record(
@@ -50,7 +50,7 @@ async def test_update_record_with_empty_data_parameters():
     faker = Faker()
     unique_id = str(uuid4())
     old_category = faker.color_name()
-    old_desc = faker.address()
+    old_desc = faker.name()
     async for db in get_db():
         with pytest.raises(ValueError, match="Data must be a non-empty dictionary."):
             await insert_record(
@@ -64,8 +64,8 @@ async def test_update_record_with_empty_data_parameters():
 @pytest.mark.asyncio
 async def test_update_record_with_random_conditions():
     faker = Faker()
-    random_key = faker.city_prefix()
-    random_value = faker.city_prefix()
+    random_key = faker.name()
+    random_value = faker.name()
     async for db in get_db():
         with pytest.raises(
             ValueError, match=f"Column {random_key} not found in {CategoryDataDocumentation.__tablename__} table!"
@@ -79,7 +79,7 @@ async def test_update_record_raised_database_query_error():
     async for db in get_db():
         with pytest.raises(DatabaseQueryError):
             await update_record(
-                db=db, table=CategoryDataDocumentation, conditions={"unique_id": uuid4()}, data={"category": faker.address()}
+                db=db, table=CategoryDataDocumentation, conditions={"unique_id": uuid4()}, data={"category": faker.name()}
             )
 
 

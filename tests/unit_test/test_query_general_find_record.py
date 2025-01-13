@@ -12,8 +12,8 @@ from utils.query.general import find_record, delete_record, insert_record
 async def test_find_all_record_with_available_data():
     faker = Faker()
     records_to_insert = [
-        {"unique_id": str(uuid4()), "category": faker.century(), "description": faker.address()},
-        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.address()},
+        {"unique_id": str(uuid4()), "category": faker.century(), "description": faker.name()},
+        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.name()},
     ]
 
     async for db in get_db():
@@ -57,7 +57,7 @@ async def test_find_single_record_with_available_data():
     faker = Faker()
     unique_id = str(uuid4())
     random_category = faker.century()
-    random_desc = faker.address()
+    random_desc = faker.name()
 
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
@@ -82,7 +82,7 @@ async def test_find_record_by_unique_id_with_available_data():
     faker = Faker()
     unique_id = str(uuid4())
     random_category = faker.century()
-    random_desc = faker.address()
+    random_desc = faker.name()
 
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
@@ -118,7 +118,7 @@ async def test_find_record_by_category_with_available_data():
     faker = Faker()
     unique_id = str(uuid4())
     random_category = faker.century()
-    random_desc = faker.address()
+    random_desc = faker.name()
 
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
@@ -141,7 +141,7 @@ async def test_find_record_by_category_with_available_data():
 @pytest.mark.asyncio
 async def test_find_record_by_description_with_empty_data():
     faker = Faker()
-    random_desc = faker.address()
+    random_desc = faker.name()
 
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
@@ -156,7 +156,7 @@ async def test_find_record_using_multiple_filter_with_available_data():
     faker = Faker()
     unique_id = str(uuid4())
     random_category = faker.century()
-    random_desc = faker.address()
+    random_desc = faker.name()
 
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
@@ -188,7 +188,7 @@ async def test_find_record_using_multiple_filter_with_empty_data():
     faker = Faker()
     unique_id = str(uuid4())
     random_category = faker.century()
-    random_desc = faker.address()
+    random_desc = faker.name()
 
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
