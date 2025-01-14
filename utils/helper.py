@@ -38,21 +38,29 @@ def find_image_path(image_path: str = None) -> list[str]:
         if not target_path.exists():
             raise DataNotFoundError(detail="Directory not found!")
 
-        # Search for image files
+        # Search for image files and format names
         image_extensions = {".jpg", ".jpeg", ".png"}
-        image_paths = [str(path) for path in target_path.rglob("*") if path.suffix.lower() in image_extensions]
+        formatted_image_paths = []
 
-        if not image_paths:
+        for path in target_path.rglob("*"):
+            if path.suffix.lower() in image_extensions:
+                # Replace whitespace in file name with underscores
+                new_name = path.name.replace(" ", "_")
+                new_path = path.with_name(new_name)
+
+                # Rename the file if it contains spaces
+                if path.name != new_name:
+                    path.rename(new_path)
+
+                # Add the formatted path to the list
+                formatted_image_paths.append(str(new_path))
+
+        if not formatted_image_paths:
             raise DataNotFoundError(detail="No image found!")
 
-        return image_paths
+        return formatted_image_paths
 
-    except DataNotFoundError as e:
-        logging.error(f"[find_image_path] {e.detail}")
-        raise
-
-    except Exception as e:
-        logging.error(f"[find_image_path] Unexpected exception: {e}")
+    except DataNotFoundError:
         raise
 
 

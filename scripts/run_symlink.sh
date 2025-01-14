@@ -2,7 +2,7 @@
 
 # Define the source and target paths
 SOURCE_DIR="/home/dfactory/Project/utils/diva/client_preview"
-TARGET_DIR="/home/dfactory/Project/DiVA/assets"
+TARGET_DIR="/home/dfactory/Project/DiVA/static"
 
 # Show usage information
 show_help() {

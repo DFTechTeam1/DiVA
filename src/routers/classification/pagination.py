@@ -1,4 +1,5 @@
 from utils.logger import logging
+from urllib.parse import quote
 from fastapi import APIRouter, status, Request, Query
 from src.schema.response import ResponseDefault
 from src.schema.request_format import AllowedIpAddress
@@ -31,6 +32,11 @@ async def labels_distribution(
             ip_address=ip_address,
             is_validated=is_validated,
         )
+
+        for image in pagination.images:
+            relative_path = image["filepath"].replace("/home/dfactory/Project/utils/diva/client_preview/", "", 1)
+            image["filepath"] = f"http://localhost:8000/api/v1/images/{quote(relative_path)}"
+
         response.message = "Retrieved labels distribution."
         response.data = pagination
     except DiVA:

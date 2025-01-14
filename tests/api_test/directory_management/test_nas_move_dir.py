@@ -42,9 +42,7 @@ async def test_move_nas_multi_dir_with_valid_payload_using_array() -> None:
 
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/move-dir", json=payload)
-        print(res)
         response = res.json()
-        print(response)
         assert res.status_code == 200
         assert response["message"] == "Directory successfully moved."
         assert response["data"]["folder_already_exsist"] is None

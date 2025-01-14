@@ -25,17 +25,11 @@ async def update_nas_directory(schema: NasMoveDirectory) -> ResponseDefault:
         sid=sid,
     )
 
-    print(target_folder_new_dir)
-    print(target_folder_existing_dir)
-
     dest_folder_new_dir, dest_folder_existing_dir = await validate_directory(
         ip_address=schema.ip_address,
         directory_path=[schema.dest_folder_path] if type(schema.dest_folder_path) is str else schema.dest_folder_path,
         sid=sid,
     )
-
-    print(dest_folder_new_dir)
-    print(dest_folder_existing_dir)
 
     try:
         if not target_folder_existing_dir:
