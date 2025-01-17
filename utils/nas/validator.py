@@ -106,6 +106,13 @@ class PayloadValidator(BaseValidator):
                 shared_folder=shared_folder, target_folder=target_folder
             )
 
+    @staticmethod
+    def delete_directory(target_folder: list | str) -> NasIntegrationError:
+        PayloadValidator.is_filled(target_folder=target_folder)
+        PayloadValidator.is_started_with_slash(target_folder=target_folder)
+        if isinstance(target_folder, list):
+            PayloadValidator.is_unique(target_folder=target_folder)
+
 
 class PathFormatter:
     @staticmethod

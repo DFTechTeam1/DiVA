@@ -35,20 +35,21 @@ async def test_delete_nas_multi_dir_with_valid_payload_using_array() -> None:
     existing_dir = await list_folder(
         ip_address=config.NAS_IP_5, directory_path="/nas_testing/api_testing"
     )
-    random_index = randint(0, len(existing_dir) - 1)
 
     payload = {
         "ip_address": config.NAS_IP_5,
         "target_folder": [
-            existing_dir[random_index]["path"],
-            existing_dir[random_index]["path"],
-            existing_dir[random_index]["path"],
+            existing_dir[-1]["path"],
+            existing_dir[-2]["path"],
+            existing_dir[-3]["path"],
         ],
     }
 
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/delete-dir", json=payload)
+        print(res)
         response = res.json()
+        print(response)
         assert res.status_code == 200
         assert response["message"] == "Directory successfully removed."
         assert len(response["data"]["folder_already_exsist"]) == len(
@@ -89,20 +90,22 @@ async def test_delete_nas_multi_dir_with_directory_already_exist_and_new_directo
     existing_dir = await list_folder(
         ip_address=config.NAS_IP_5, directory_path="/nas_testing/api_testing"
     )
-    random_index = randint(0, len(existing_dir) - 1)
+    randint(0, len(existing_dir) - 1)
 
     payload = {
         "ip_address": config.NAS_IP_5,
         "target_folder": [
-            existing_dir[random_index]["path"],
-            existing_dir[random_index]["path"],
+            existing_dir[-1]["path"],
+            existing_dir[-2]["path"],
             f"/nas_testing/api_testing/{str(uuid4())}",
         ],
     }
 
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/delete-dir", json=payload)
+        print(res)
         response = res.json()
+        print(response)
         assert res.status_code == 200
         assert response["message"] == "Directory successfully removed."
         assert len(response["data"]["non_existing_folder"]) == 1
@@ -110,18 +113,20 @@ async def test_delete_nas_multi_dir_with_directory_already_exist_and_new_directo
 
 
 @pytest.mark.asyncio
-async def test_delete_nas_single_dir_with_invalid_shared_folder_params_using_array() -> (
+async def test_delete_nas_single_dir_with_invalid_target_folder_params_using_array() -> (
     None
 ):
     """Should skip deletion directory due to folder not found"""
     payload = {
         "ip_address": config.NAS_IP_5,
-        "target_folder": ["random_shared_folder/also_random_dir"],
+        "target_folder": ["/random_shared_folder/also_random_dir"],
     }
 
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/delete-dir", json=payload)
+        print(res)
         response = res.json()
+        print(response)
         assert res.status_code == 200
         assert response["message"] == "Input should be existing directory on NAS."
         assert response["data"]["folder_already_exsist"] is None
@@ -129,18 +134,20 @@ async def test_delete_nas_single_dir_with_invalid_shared_folder_params_using_arr
 
 
 @pytest.mark.asyncio
-async def test_delete_nas_single_dir_with_invalid_shared_folder_params_using_string() -> (
+async def test_delete_nas_single_dir_with_invalid_target_folder_params_using_string() -> (
     None
 ):
     """Should skip deletion directory due to folder not found"""
     payload = {
         "ip_address": config.NAS_IP_5,
-        "target_folder": "random_shared_folder/also_random_dir",
+        "target_folder": "/random_shared_folder/also_random_dir",
     }
 
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/delete-dir", json=payload)
+        print(res)
         response = res.json()
+        print(response)
         assert res.status_code == 200
         assert response["message"] == "Input should be existing directory on NAS."
         assert len(response["data"]["non_existing_folder"]) == 1
@@ -155,14 +162,16 @@ async def test_delete_nas_multi_dir_with_invalid_shared_folder_params_using_arra
     payload = {
         "ip_address": config.NAS_IP_5,
         "target_folder": [
-            "random_shared_folder/also_random_dir1",
-            "random_shared_folder/also_random_dir2",
+            "/random_shared_folder/also_random_dir1",
+            "/random_shared_folder/also_random_dir2",
         ],
     }
 
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/delete-dir", json=payload)
+        print(res)
         response = res.json()
+        print(response)
         assert res.status_code == 200
         assert response["message"] == "Input should be existing directory on NAS."
         assert response["data"]["folder_already_exsist"] is None

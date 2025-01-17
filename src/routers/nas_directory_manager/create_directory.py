@@ -48,9 +48,9 @@ async def create_nas_directory_endpoint(
             target_shared_folder=schema.shared_folder,
         )
 
-        logging.info("Endpoint create NAS directory.")
         shared_folder, target_folder = formatter.revoke_path(path=new_dir)
 
+        logging.info("Endpoint create directory NAS.")
         await create_nas_dir(
             ip_address=schema.ip_address,
             shared_folder=shared_folder,
