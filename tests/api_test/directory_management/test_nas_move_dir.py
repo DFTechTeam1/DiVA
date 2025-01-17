@@ -43,8 +43,8 @@ async def test_move_nas_multi_dir_with_valid_payload_using_array() -> None:
     payload = {
         "ip_address": config.NAS_IP_5,
         "target_folder": [
-            existing_dir[randint(0, len(existing_dir) - 1)]["path"],
-            existing_dir[randint(0, len(existing_dir) - 1)]["path"],
+            existing_dir[-1]["path"],
+            existing_dir[-2]["path"],
         ],
         "dest_folder_path": [destination, destination],
     }

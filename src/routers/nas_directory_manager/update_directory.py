@@ -1,17 +1,13 @@
 from utils.logger import logging
 from fastapi import APIRouter, status
-from src.schema.response import ResponseDefault, DirectoryStatus
-from src.schema.request_format import NasUpdateDirectory
 from utils.custom_error import ServiceError, DiVA
+from src.schema.request_format import NasUpdateDirectory
+from src.schema.response import ResponseDefault, DirectoryStatus
+from utils.nas.validator import PathFormatter, PayloadValidator
 from utils.nas.external import (
     auth_nas,
     validate_directory,
     update_nas_dir,
-)
-from utils.nas.validator import (
-    validate_and_update_dir_path,
-    validate_update_dir_path,
-    refactor_path,
 )
 
 
@@ -19,16 +15,17 @@ router = APIRouter(tags=["Directory Management"])
 
 
 async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
-    logging.info("Endpoint Update NAS Directory.")
     response = ResponseDefault()
+    validator = PayloadValidator()
+    formatter = PathFormatter()
+
+    validator.update_directory(
+        target_folder=schema.target_folder, changed_name_into=schema.changed_name_into
+    )
 
     try:
-        validate_update_dir_path(
-            target_folder=schema.target_folder,
-            changed_name_into=schema.changed_name_into,
-        )
-
         sid = await auth_nas(ip_address=schema.ip_address)
+
         new_dir, existing_dir = await validate_directory(
             ip_address=schema.ip_address,
             directory_path=[schema.target_folder]
@@ -43,7 +40,7 @@ async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
             response.data = DirectoryStatus(non_existing_folder=new_dir)
             return response
 
-        refactored_path = refactor_path(
+        refactored_path = formatter.refactor_path(
             target_folder=existing_dir,
             folder_name=[schema.changed_name_into]
             if type(schema.changed_name_into) is str
@@ -65,7 +62,7 @@ async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
             )
             return response
 
-        output_target_path, output_rename = validate_and_update_dir_path(
+        output_target_path, output_rename = formatter.validate_and_update_dir_path(
             new_dir=new_updated_dir,
             target_path=[schema.target_folder]
             if type(schema.target_folder) is str
@@ -75,6 +72,7 @@ async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
             else schema.changed_name_into,
         )
 
+        logging.info("Endpoint update NAS directory.")
         await update_nas_dir(
             ip_address=schema.ip_address,
             target_folder=output_target_path,

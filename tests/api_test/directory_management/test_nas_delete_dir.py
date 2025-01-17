@@ -90,7 +90,6 @@ async def test_delete_nas_multi_dir_with_directory_already_exist_and_new_directo
     existing_dir = await list_folder(
         ip_address=config.NAS_IP_5, directory_path="/nas_testing/api_testing"
     )
-    randint(0, len(existing_dir) - 1)
 
     payload = {
         "ip_address": config.NAS_IP_5,
