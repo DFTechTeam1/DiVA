@@ -1,6 +1,5 @@
 import pytest
 import httpx
-from random import randint
 from src.secret import Config
 from utils.nas.external import list_folder
 from uuid import uuid4
@@ -37,8 +36,7 @@ async def test_update_nas_single_dir_with_valid_payload_using_array() -> None:
     existing_dir = await list_folder(
         ip_address=config.NAS_IP_5, directory_path="/nas_testing/api_testing"
     )
-    random_index = randint(0, len(existing_dir) - 1)
-    random_path = existing_dir[random_index]["path"]
+    random_path = existing_dir[-1]["path"]
 
     payload = {
         "ip_address": config.NAS_IP_5,
