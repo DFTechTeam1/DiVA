@@ -1,43 +1,41 @@
 from utils.logger import logging
 from fastapi import APIRouter, status
-from src.schema.response import ResponseDefault, DirectoryStatus
-from src.schema.request_format import NasMoveDirectory
+from utils.nas.validator import PayloadValidator
 from utils.custom_error import ServiceError, DiVA
+from src.schema.request_format import NasMoveDirectory
+from src.schema.response import ResponseDefault, DirectoryStatus
 from utils.nas.external import auth_nas, validate_directory, move_nas_dir
-from utils.nas.validator import (
-    validate_update_dir_path,
-)
 
 router = APIRouter(tags=["Directory Management"])
 
 
 async def update_nas_directory(schema: NasMoveDirectory) -> ResponseDefault:
-    logging.info("Endpoint Update NAS Directory.")
     response = ResponseDefault()
+    validator = PayloadValidator()
 
-    validate_update_dir_path(
-        target_folder=schema.target_folder, changed_name_into=schema.dest_folder_path
-    )
-
-    sid = await auth_nas(ip_address=schema.ip_address)
-
-    target_folder_new_dir, target_folder_existing_dir = await validate_directory(
-        ip_address=schema.ip_address,
-        directory_path=[schema.target_folder]
-        if type(schema.target_folder) is str
-        else schema.target_folder,
-        sid=sid,
-    )
-
-    dest_folder_new_dir, dest_folder_existing_dir = await validate_directory(
-        ip_address=schema.ip_address,
-        directory_path=[schema.dest_folder_path]
-        if type(schema.dest_folder_path) is str
-        else schema.dest_folder_path,
-        sid=sid,
+    validator.move_directory(
+        target_folder=schema.target_folder, destination_path=schema.dest_folder_path
     )
 
     try:
+        sid = await auth_nas(ip_address=schema.ip_address)
+
+        target_folder_new_dir, target_folder_existing_dir = await validate_directory(
+            ip_address=schema.ip_address,
+            directory_path=[schema.target_folder]
+            if type(schema.target_folder) is str
+            else schema.target_folder,
+            sid=sid,
+        )
+
+        dest_folder_new_dir, dest_folder_existing_dir = await validate_directory(
+            ip_address=schema.ip_address,
+            directory_path=[schema.dest_folder_path]
+            if type(schema.dest_folder_path) is str
+            else schema.dest_folder_path,
+            sid=sid,
+        )
+
         if target_folder_existing_dir:
             if dest_folder_new_dir:
                 response.message = (
@@ -45,6 +43,7 @@ async def update_nas_directory(schema: NasMoveDirectory) -> ResponseDefault:
                 )
                 response.data = DirectoryStatus(non_existing_folder=dest_folder_new_dir)
             else:
+                logging.info("Endpoint move directory NAS.")
                 await move_nas_dir(
                     ip_address=schema.ip_address,
                     target_folder=target_folder_existing_dir,

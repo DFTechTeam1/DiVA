@@ -113,6 +113,27 @@ class PayloadValidator(BaseValidator):
         if isinstance(target_folder, list):
             PayloadValidator.is_unique(target_folder=target_folder)
 
+    @staticmethod
+    def move_directory(
+        target_folder: list | str, destination_path: list | str
+    ) -> NasIntegrationError:
+        PayloadValidator.is_filled(
+            target_folder=target_folder, destination_path=destination_path
+        )
+        PayloadValidator.is_same_datatype(
+            target_folder=target_folder, destination_path=destination_path
+        )
+        PayloadValidator.is_started_with_slash(target_folder=target_folder)
+        PayloadValidator.is_started_with_slash(destination_path=destination_path)
+
+        if isinstance(target_folder, list):
+            PayloadValidator.is_unique(target_folder=target_folder)
+
+        if isinstance(target_folder, list) and isinstance(destination_path, list):
+            PayloadValidator.is_length_equal(
+                target_folder=target_folder, destination_path=destination_path
+            )
+
 
 class PathFormatter:
     @staticmethod
