@@ -21,6 +21,10 @@ async def delete_nas_directory_endpoint(schema: NasDeleteDirectory) -> ResponseD
         directory_path=[schema.target_folder] if type(schema.target_folder) is str else schema.target_folder,
         sid=sid,
     )
+
+    print(new_dir)
+    print(existing_dir)
+
     try:
         if not existing_dir:
             response.message = "Input should be existing directory on NAS."

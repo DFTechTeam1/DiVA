@@ -34,7 +34,7 @@ async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
 
         if not existing_dir:
             """Response given when target folder is not exist on NAS."""
-            response.message = "Input should be existing directory on NAS."
+            response.message = "Target folder should be existing directory on NAS."
             response.data = DirectoryStatus(non_existing_folder=new_dir)
             return response
 

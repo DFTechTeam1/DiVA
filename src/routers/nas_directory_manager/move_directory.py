@@ -32,25 +32,23 @@ async def update_nas_directory(schema: NasMoveDirectory) -> ResponseDefault:
     )
 
     try:
-        if not target_folder_existing_dir:
+        if target_folder_existing_dir:
+            if dest_folder_new_dir:
+                response.message = "Destination folder should be existing directory on NAS."
+                response.data = DirectoryStatus(non_existing_folder=dest_folder_new_dir)
+            else:
+                await move_nas_dir(
+                    ip_address=schema.ip_address,
+                    target_folder=target_folder_existing_dir,
+                    dest_folder_path=dest_folder_existing_dir,
+                    sid=sid,
+                )
+
+                response.message = "Directory successfully moved."
+                response.data = DirectoryStatus(folder_already_exsist=target_folder_existing_dir)
+        else:
             response.message = "Target folder should be existing directory on NAS."
             response.data = DirectoryStatus(non_existing_folder=target_folder_new_dir)
-            return response
-
-        if not dest_folder_existing_dir:
-            response.message = "Dest folder path already exist on NAS."
-            response.data = DirectoryStatus(folder_already_exsist=dest_folder_existing_dir)
-            return response
-
-        await move_nas_dir(
-            ip_address=schema.ip_address,
-            target_folder=target_folder_existing_dir,
-            dest_folder_path=dest_folder_existing_dir,
-            sid=sid,
-        )
-
-        response.message = "Directory successfully moved."
-        response.data = DirectoryStatus(non_existing_folder=target_folder_new_dir)
     except DiVA:
         raise
     except Exception as e:

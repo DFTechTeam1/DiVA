@@ -71,6 +71,7 @@ async def validate_directory(ip_address: str, directory_path: list, sid: str) ->
                 response = await client.get(NAS_BASE_URL, params=params)
                 response.raise_for_status()
                 data = response.json()
+
                 if not data["success"]:
                     logging.info(f"Validated new path {path}.")
                     new_directory.append(path)

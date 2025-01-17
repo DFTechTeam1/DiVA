@@ -3,16 +3,11 @@ from fastapi import APIRouter, status
 from src.schema.response import ResponseDefault, DirectoryStatus
 from src.schema.request_format import NasDirectoryManagement
 from utils.custom_error import ServiceError, DiVA
-from utils.nas.validator import (
-    validate_shared_folder,
-    path_formatter,
-    decode_path_formatter,
-)
+from utils.nas.validator import validate_shared_folder, decode_path_formatter, PayloadValidator, path_formatter
 from utils.nas.external import (
     auth_nas,
     extract_shared_folder,
     validate_directory,
-    create_nas_dir,
 )
 
 router = APIRouter(tags=["Directory Management"])
@@ -20,6 +15,8 @@ router = APIRouter(tags=["Directory Management"])
 
 async def create_nas_directory_endpoint(schema: NasDirectoryManagement) -> ResponseDefault:
     response = ResponseDefault()
+    validator = PayloadValidator()
+    validator.create_directory(shared_folder=schema.shared_folder, target_folder=schema.target_folder)
 
     formated_path = path_formatter(shared_folder=schema.shared_folder, target_folder=schema.target_folder)
     sid = await auth_nas(ip_address=schema.ip_address)
@@ -27,7 +24,6 @@ async def create_nas_directory_endpoint(schema: NasDirectoryManagement) -> Respo
 
     try:
         if not new_dir:
-            """Response given if all directory creation is already exsist on NAS"""
             response.message = "Directory already exist."
             response.data = DirectoryStatus(folder_already_exsist=existing_dir)
             return response
@@ -37,7 +33,7 @@ async def create_nas_directory_endpoint(schema: NasDirectoryManagement) -> Respo
 
         logging.info("Endpoint create NAS directory.")
         shared_folder, target_folder = decode_path_formatter(paths=new_dir)
-        await create_nas_dir(ip_address=schema.ip_address, shared_folder=shared_folder, target_folder=target_folder, sid=sid)
+        # await create_nas_dir(ip_address=schema.ip_address, shared_folder=shared_folder, target_folder=target_folder, sid=sid)
 
         response.message = "Directory created successfully."
         response.data = DirectoryStatus(folder_already_exsist=existing_dir, non_existing_folder=new_dir)

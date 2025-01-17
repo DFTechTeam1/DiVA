@@ -1,8 +1,77 @@
 from collections import Counter
+from typing import Any
 from utils.custom_error import (
     NasIntegrationError,
     DataNotFoundError,
 )
+
+
+class BaseValidator:
+    @staticmethod
+    def is_filled(**kwargs: Any) -> NasIntegrationError:
+        for name, value in kwargs.items():
+            if not value:
+                raise NasIntegrationError(f"{name} cannot be empty.")
+
+    @staticmethod
+    def is_same_datatype(**kwargs) -> NasIntegrationError:
+        keys = list(kwargs.keys())
+        values = list(kwargs.values())
+
+        for i in range(len(values) - 1):
+            if not isinstance(values[i], type(values[i + 1])):
+                raise NasIntegrationError(
+                    f"{keys[i]} and {keys[i + 1]} must be of the same data type, "
+                    f"{keys[i]}: {type(values[i])}, {keys[i + 1]}: {type(values[i + 1])}."
+                )
+
+    @staticmethod
+    def is_unique(**kwargs: Any) -> NasIntegrationError:
+        for name, elements in kwargs.items():
+            duplicates = [item for item, count in Counter(elements).items() if count > 1]
+            if duplicates:
+                raise NasIntegrationError(f"{name} should be unique. Duplicated entries: {duplicates}.")
+
+    @staticmethod
+    def is_started_with_slash(**kwargs: Any) -> NasIntegrationError:
+        for name, value in kwargs.items():
+            if isinstance(value, list):
+                for entry in value:
+                    if not entry.startswith("/"):
+                        raise NasIntegrationError(f"{name} should start with '/': {entry}.")
+            else:
+                if not value.startswith("/"):
+                    raise NasIntegrationError(f"{name} should start with '/': {value}.")
+
+    @staticmethod
+    def is_length_equal(**kwargs) -> NasIntegrationError:
+        keys = list(kwargs.keys())
+        values = list(kwargs.values())
+
+        for i in range(len(values) - 1):
+            if len(values[i]) != len(values[i + 1]):
+                raise NasIntegrationError(
+                    f"{keys[i]} and {keys[i + 1]} must have the same length, "
+                    f"{keys[i]}: {len(values[i])}, {keys[i + 1]}: {len(values[i + 1])}."
+                )
+
+
+class PayloadValidator(BaseValidator):
+    @staticmethod
+    def create_directory(shared_folder: list | str, target_folder: list | str) -> NasIntegrationError:
+        PayloadValidator.is_filled(shared_folder=shared_folder, target_folder=target_folder)
+        PayloadValidator.is_same_datatype(shared_folder=shared_folder, target_folder=target_folder)
+        PayloadValidator.is_started_with_slash(shared_folder=shared_folder)
+
+        if isinstance(target_folder, list):
+            PayloadValidator.is_unique(target_folder=target_folder)
+
+        if isinstance(shared_folder, list) and isinstance(target_folder, list):
+            PayloadValidator.is_length_equal(shared_folder=shared_folder, target_folder=target_folder)
+
+
+# class PathFormatter:
+#     pass
 
 
 def path_formatter(shared_folder: list | str, target_folder: list | str) -> list:
@@ -80,7 +149,7 @@ def validate_update_dir_path(target_folder: list | str, changed_name_into: list 
             raise NasIntegrationError(f"Target folder contains duplicate entries: {duplicates}.")
     if isinstance(target_folder, str):
         if not target_folder.startswith("/"):
-            raise NasIntegrationError(f"Shared folder should start with '/': {target_folder}.")
+            raise NasIntegrationError(f"Target folder should start with '/': {target_folder}.")
     return None
 
 
