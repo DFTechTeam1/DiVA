@@ -18,7 +18,9 @@ async def delete_nas_directory_endpoint(schema: NasDeleteDirectory) -> ResponseD
     sid = await auth_nas(ip_address=schema.ip_address)
     new_dir, existing_dir = await validate_directory(
         ip_address=schema.ip_address,
-        directory_path=[schema.target_folder] if type(schema.target_folder) is str else schema.target_folder,
+        directory_path=[schema.target_folder]
+        if type(schema.target_folder) is str
+        else schema.target_folder,
         sid=sid,
     )
 
@@ -32,10 +34,14 @@ async def delete_nas_directory_endpoint(schema: NasDeleteDirectory) -> ResponseD
             return response
 
         logging.info("Endpoint delete NAS directory.")
-        await delete_nas_dir(ip_address=schema.ip_address, folder_path=existing_dir, sid=sid)
+        await delete_nas_dir(
+            ip_address=schema.ip_address, folder_path=existing_dir, sid=sid
+        )
 
         response.message = "Directory successfully removed."
-        response.data = DirectoryStatus(non_existing_folder=new_dir, folder_already_exsist=existing_dir)
+        response.data = DirectoryStatus(
+            non_existing_folder=new_dir, folder_already_exsist=existing_dir
+        )
     except DiVA:
         raise
     except ValueError:

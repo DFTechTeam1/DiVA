@@ -12,8 +12,12 @@ router = APIRouter(tags=["Classification"], prefix="/classification")
 
 async def labels_distribution(
     request: Request,
-    page: int = Query(default=1, ge=1, description="Total page available for current chunk data."),
-    image_per_page: int = Query(default=10, ge=1, description="Splitted total image into current chunk data."),
+    page: int = Query(
+        default=1, ge=1, description="Total page available for current chunk data."
+    ),
+    image_per_page: int = Query(
+        default=10, ge=1, description="Splitted total image into current chunk data."
+    ),
     is_validated: bool = False,
 ) -> ResponseDefault:
     logging.info("Endpoint Labels Distribution.")
@@ -24,7 +28,9 @@ async def labels_distribution(
 
     try:
         if ip_address not in allow_ips.ip_address:
-            raise AccessUnauthorized("IP Address blacklisted. Please ask IT Team for add IP as whitelist.")
+            raise AccessUnauthorized(
+                "IP Address blacklisted. Please ask IT Team for add IP as whitelist."
+            )
 
         pagination = await extract_distributed_entries(
             page=page,
@@ -34,8 +40,12 @@ async def labels_distribution(
         )
 
         for image in pagination.images:
-            relative_path = image["filepath"].replace("/home/dfactory/Project/utils/diva/client_preview/", "", 1)
-            image["filepath"] = f"http://localhost:8000/api/v1/images/{quote(relative_path)}"
+            relative_path = image["filepath"].replace(
+                "/home/dfactory/Project/utils/diva/client_preview/", "", 1
+            )
+            image["filepath"] = (
+                f"http://localhost:8000/api/v1/images/{quote(relative_path)}"
+            )
 
         response.message = "Retrieved labels distribution."
         response.data = pagination

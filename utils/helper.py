@@ -110,4 +110,6 @@ def label_distribution(entries: list) -> None:
     }
 
     for label, percentages in label_percentages.items():
-        logging.info(f"{label}: True = {percentages['true']:.2f}%, False = {percentages['false']:.2f}%")
+        logging.info(
+            f"{label}: True = {percentages['true']:.2f}%, False = {percentages['false']:.2f}%"
+        )

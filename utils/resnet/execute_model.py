@@ -71,12 +71,16 @@ def train_validate_resnet(
                 loss = torch.sum(error(y_hat, labels))
                 val_loss.append(loss.item())
 
-        logging.info(f"Epoch {epoch+1}\t train loss {np.mean(train_loss):.4}\t validation loss {np.mean(val_loss):.4}")
+        logging.info(
+            f"Epoch {epoch+1}\t train loss {np.mean(train_loss):.4}\t validation loss {np.mean(val_loss):.4}"
+        )
 
     return model
 
 
-def load_resnet(num_labels: int, model_path: str, device: Literal["cuda", "gpu"]) -> CustomResNet50Classifier:
+def load_resnet(
+    num_labels: int, model_path: str, device: Literal["cuda", "gpu"]
+) -> CustomResNet50Classifier:
     loaded_model = CustomResNet50Classifier(num_labels=num_labels)
     loaded_model.load_state_dict(torch.load(model_path, weights_only=True))
     loaded_model = loaded_model.to(device)
@@ -128,7 +132,9 @@ def custom_resnet50_trainer(epochs: int = 250) -> None:
     if not entries:
         logging.info("[custom_resnet50_trainer] Skip training.")
     elif len(entries) < 10:
-        logging.info("[custom_resnet50_trainer] Skip training. Image threshold not satisfied.")
+        logging.info(
+            "[custom_resnet50_trainer] Skip training. Image threshold not satisfied."
+        )
     else:
         label_distribution(entries=entries)
         dataset = CustomDataLoader(entries=entries)
@@ -153,7 +159,9 @@ def custom_resnet50_trainer(epochs: int = 250) -> None:
             optimizer=optimizer,
         )
 
-        test_accuracy = predicting_resnet(device=device, dataset=dataset, dataloader=dataloader, model=trained_model)
+        test_accuracy = predicting_resnet(
+            device=device, dataset=dataset, dataloader=dataloader, model=trained_model
+        )
 
         # Saving model into local project directory
         model_path = save_model(model=trained_model, model_name=model_name)
@@ -182,9 +190,13 @@ def custom_resnet50_fine_tuner(epochs: int = 250) -> None:
     if not entries:
         logging.info("[custom_resnet50_fine_tuner] No updated validated data.")
     elif len(entries) < 10:
-        logging.info("[custom_resnet50_fine_tuner] Skip fine tuning. Image threshold not satisfied.")
+        logging.info(
+            "[custom_resnet50_fine_tuner] Skip fine tuning. Image threshold not satisfied."
+        )
     else:
-        logging.info(f"[custom_resnet50_fine_tuner] Found new {len(entries)} images. Proceed fine tuning phase.")
+        logging.info(
+            f"[custom_resnet50_fine_tuner] Found new {len(entries)} images. Proceed fine tuning phase."
+        )
         # Start task
         started_task_at = datetime.now()
 
@@ -199,7 +211,9 @@ def custom_resnet50_fine_tuner(epochs: int = 250) -> None:
         dataloader = DataLoader(dataset=dataset, shuffle=True)
 
         # Load resnet model
-        model = load_resnet(num_labels=labels, model_path=cls_model.model_path, device=device)
+        model = load_resnet(
+            num_labels=labels, model_path=cls_model.model_path, device=device
+        )
         optimizer = Adam(params=model.parameters(), lr=1e-5)
 
         # Training, Validation, and Testing (async)
@@ -212,7 +226,9 @@ def custom_resnet50_fine_tuner(epochs: int = 250) -> None:
             optimizer=optimizer,
         )
 
-        test_accuracy = predicting_resnet(device=device, dataset=dataset, dataloader=dataloader, model=trained_model)
+        test_accuracy = predicting_resnet(
+            device=device, dataset=dataset, dataloader=dataloader, model=trained_model
+        )
 
         # Updating model into local project directory
         save_model(model=trained_model, model_name=cls_model.model_name)

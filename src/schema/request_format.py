@@ -125,25 +125,35 @@ class LoginNasApi(
     format: Literal["cookie"] = None
 
 
-class LogoutNasApi(SynologyApiPath, SynologyApiVersion, SynologyMethod, SynologyApiSession):
+class LogoutNasApi(
+    SynologyApiPath, SynologyApiVersion, SynologyMethod, SynologyApiSession
+):
     pass
 
 
-class ListShareNasApi(SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams):
+class ListShareNasApi(
+    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
+):
     pass
 
 
-class CreateFolderNasApi(SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams):
+class CreateFolderNasApi(
+    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
+):
     folder_path: str | list[str] = None
     name: str | list[str] = None
 
 
-class UpdateFolderNasApi(SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams):
+class UpdateFolderNasApi(
+    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
+):
     path: str | list[str] = None
     name: str | list[str] = None
 
 
-class DeleteFolderNasApi(SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams):
+class DeleteFolderNasApi(
+    SynologyApiPath, SynologyApiVersion, SynologyMethod, NasSidParams
+):
     path: str | list[str] = None
 
 

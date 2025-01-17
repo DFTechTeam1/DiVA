@@ -48,7 +48,9 @@ class ObjectDocumentationDetails(SQLModel, table=True):
     )
     category: str = Field(default=None)
     description: str = Field(default=None)
-    information: CategoryDataDocumentation = Relationship(back_populates="object_details")
+    information: CategoryDataDocumentation = Relationship(
+        back_populates="object_details"
+    )
 
 
 class EnvironmentDocumentationDetails(SQLModel, table=True):
@@ -61,7 +63,9 @@ class EnvironmentDocumentationDetails(SQLModel, table=True):
     )
     category: str = Field(default=None)
     description: str = Field(default=None)
-    information: CategoryDataDocumentation = Relationship(back_populates="environment_details")
+    information: CategoryDataDocumentation = Relationship(
+        back_populates="environment_details"
+    )
 
 
 class DesignTypeDocumentationDetails(SQLModel, table=True):
@@ -74,7 +78,9 @@ class DesignTypeDocumentationDetails(SQLModel, table=True):
     )
     category: str = Field(default=None)
     description: str = Field(default=None)
-    information: CategoryDataDocumentation = Relationship(back_populates="design_type_details")
+    information: CategoryDataDocumentation = Relationship(
+        back_populates="design_type_details"
+    )
 
 
 class TimePeriodDocumentationDetails(SQLModel, table=True):
@@ -87,7 +93,9 @@ class TimePeriodDocumentationDetails(SQLModel, table=True):
     )
     category: str = Field(default=None)
     description: str = Field(default=None)
-    information: CategoryDataDocumentation = Relationship(back_populates="time_period_details")
+    information: CategoryDataDocumentation = Relationship(
+        back_populates="time_period_details"
+    )
 
 
 class DominantColorDocumentationDetails(SQLModel, table=True):
@@ -100,7 +108,9 @@ class DominantColorDocumentationDetails(SQLModel, table=True):
     )
     category: str = Field(default=None)
     description: str = Field(default=None)
-    information: CategoryDataDocumentation = Relationship(back_populates="dominant_color_details")
+    information: CategoryDataDocumentation = Relationship(
+        back_populates="dominant_color_details"
+    )
 
 
 class CultureStyleDocumentationDetails(SQLModel, table=True):
@@ -113,7 +123,9 @@ class CultureStyleDocumentationDetails(SQLModel, table=True):
     )
     category: str = Field(default=None)
     description: str = Field(default=None)
-    information: CategoryDataDocumentation = Relationship(back_populates="culture_style_details")
+    information: CategoryDataDocumentation = Relationship(
+        back_populates="culture_style_details"
+    )
 
 
 class ModelCard(SQLModel, table=True):
@@ -128,7 +140,9 @@ class ModelCard(SQLModel, table=True):
     model_path: str = Field(default=None)
     model_type: ModelType = Field(default=None)
     trained_image: int = Field(default=None)
-    model_details: list["ModelAccuracy"] = Relationship(back_populates="information", cascade_delete=True)
+    model_details: list["ModelAccuracy"] = Relationship(
+        back_populates="information", cascade_delete=True
+    )
 
 
 class ModelAccuracy(SQLModel, table=True):

@@ -7,7 +7,13 @@ from src.schema.response import ResponseDefault
 from src.schema.request_format import LabelsValidator, AllowedIpAddress
 from utils.query.general import find_record, update_record
 from services.postgres.models import ImageTag
-from utils.custom_error import AccessUnauthorized, ServiceError, DatabaseQueryError, DataNotFoundError, DiVA
+from utils.custom_error import (
+    AccessUnauthorized,
+    ServiceError,
+    DatabaseQueryError,
+    DataNotFoundError,
+    DiVA,
+)
 
 
 router = APIRouter(tags=["Classification"], prefix="/classification")
@@ -24,11 +30,15 @@ async def labels_validator(
     response = ResponseDefault()
     allow_ips = AllowedIpAddress()
     ip_address = request.client.host
-    image_record = await find_record(db=db, table=ImageTag, id=image_id, ip_address=ip_address)
+    image_record = await find_record(
+        db=db, table=ImageTag, id=image_id, ip_address=ip_address
+    )
 
     try:
         if ip_address not in allow_ips.ip_address:
-            raise AccessUnauthorized("IP Address blacklisted. Please ask IT Team for add IP as whitelist.")
+            raise AccessUnauthorized(
+                "IP Address blacklisted. Please ask IT Team for add IP as whitelist."
+            )
 
         if not image_record:
             raise DataNotFoundError(detail="Data not found.")

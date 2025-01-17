@@ -6,7 +6,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSessio
 config = Config()
 
 
-def database_connection(connection_type: Literal["sync", "async"] = "sync") -> AsyncEngine | Engine:
+def database_connection(
+    connection_type: Literal["sync", "async"] = "sync",
+) -> AsyncEngine | Engine:
     if connection_type == "async":
         return create_async_engine(url=config.ASYNC_PGSQL_CONNECTION)
     return create_engine(url=config.SYNC_PGSQL_CONNECTION)

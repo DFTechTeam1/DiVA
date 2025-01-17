@@ -23,12 +23,17 @@ async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
     response = ResponseDefault()
 
     try:
-        validate_update_dir_path(target_folder=schema.target_folder, changed_name_into=schema.changed_name_into)
+        validate_update_dir_path(
+            target_folder=schema.target_folder,
+            changed_name_into=schema.changed_name_into,
+        )
 
         sid = await auth_nas(ip_address=schema.ip_address)
         new_dir, existing_dir = await validate_directory(
             ip_address=schema.ip_address,
-            directory_path=[schema.target_folder] if type(schema.target_folder) is str else schema.target_folder,
+            directory_path=[schema.target_folder]
+            if type(schema.target_folder) is str
+            else schema.target_folder,
             sid=sid,
         )
 
@@ -40,7 +45,9 @@ async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
 
         refactored_path = refactor_path(
             target_folder=existing_dir,
-            folder_name=[schema.changed_name_into] if type(schema.changed_name_into) is str else schema.changed_name_into,
+            folder_name=[schema.changed_name_into]
+            if type(schema.changed_name_into) is str
+            else schema.changed_name_into,
         )
 
         new_updated_dir, updated_dir_already_exist = await validate_directory(
@@ -52,22 +59,35 @@ async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
         if not new_updated_dir:
             """Response given when target of updated dir already exist on NAS"""
             response.message = "All target folder already exist."
-            response.data = DirectoryStatus(folder_already_exsist=updated_dir_already_exist, non_existing_folder=new_updated_dir)
+            response.data = DirectoryStatus(
+                folder_already_exsist=updated_dir_already_exist,
+                non_existing_folder=new_updated_dir,
+            )
             return response
 
         output_target_path, output_rename = validate_and_update_dir_path(
             new_dir=new_updated_dir,
-            target_path=[schema.target_folder] if type(schema.target_folder) is str else schema.target_folder,
-            target_rename_path=[schema.changed_name_into] if type(schema.changed_name_into) is str else schema.changed_name_into,
+            target_path=[schema.target_folder]
+            if type(schema.target_folder) is str
+            else schema.target_folder,
+            target_rename_path=[schema.changed_name_into]
+            if type(schema.changed_name_into) is str
+            else schema.changed_name_into,
         )
 
         await update_nas_dir(
-            ip_address=schema.ip_address, target_folder=output_target_path, changed_name_into=output_rename, sid=sid
+            ip_address=schema.ip_address,
+            target_folder=output_target_path,
+            changed_name_into=output_rename,
+            sid=sid,
         )
 
         """Response given when at least 1 valid data (valid target_folder and changed_name_into its not an existing folder in NAS)"""
         response.message = "Directory renamed successfully."
-        response.data = DirectoryStatus(folder_already_exsist=updated_dir_already_exist, non_existing_folder=new_updated_dir)
+        response.data = DirectoryStatus(
+            folder_already_exsist=updated_dir_already_exist,
+            non_existing_folder=new_updated_dir,
+        )
 
     except DiVA:
         raise

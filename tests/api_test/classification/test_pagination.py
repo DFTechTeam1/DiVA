@@ -48,7 +48,11 @@ async def test_labels_description_with_valid_is_validated_parameters() -> None:
         response = res.json()
 
         assert res.status_code == 200
-        assert response["data"]["images"] is None if not total_validated_images else total_validated_images
+        assert (
+            response["data"]["images"] is None
+            if not total_validated_images
+            else total_validated_images
+        )
 
 
 @pytest.mark.asyncio

@@ -43,7 +43,9 @@ async def insert_image_tag_entry(
         start_index = end_index
 
     async_engine = database_connection(connection_type="async")
-    async_session = sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False)
+    async_session = sessionmaker(
+        bind=async_engine, class_=AsyncSession, expire_on_commit=False
+    )
 
     async with async_session() as session:
         try:
@@ -73,7 +75,9 @@ async def initialize_image_tag_preparation() -> None:
     return None
 
 
-def extract_image_tag_entries(is_validated: bool = True, is_trained: bool = False) -> list:
+def extract_image_tag_entries(
+    is_validated: bool = True, is_trained: bool = False
+) -> list:
     with database_connection().connect() as session:
         try:
             query = (
@@ -87,7 +91,9 @@ def extract_image_tag_entries(is_validated: bool = True, is_trained: bool = Fals
             execute = session.execute(query)
             rows = execute.fetchall()
             if not rows:
-                logging.warning("[extract_validated_image_tag] No validated data entry!")
+                logging.warning(
+                    "[extract_validated_image_tag] No validated data entry!"
+                )
 
             return [dict(row._mapping) for row in rows]
         except DataNotFoundError:
@@ -95,7 +101,9 @@ def extract_image_tag_entries(is_validated: bool = True, is_trained: bool = Fals
         except DatabaseQueryError:
             raise
         except Exception as e:
-            logging.error(f"[extract_validated_image_tag] Error retrieving all entry: {e}")
+            logging.error(
+                f"[extract_validated_image_tag] Error retrieving all entry: {e}"
+            )
             session.rollback()
             raise DatabaseQueryError(detail="Invalid database query")
         finally:
@@ -110,12 +118,18 @@ def update_image_tag_is_trained(entries: list[dict]) -> None:
                 logging.warning("[update_image_tag_is_trained] No entries to update!")
                 return
 
-            query = update(ImageTag).where(ImageTag.id.in_(ids_to_update)).values(is_trained=True)
+            query = (
+                update(ImageTag)
+                .where(ImageTag.id.in_(ids_to_update))
+                .values(is_trained=True)
+            )
 
             session.execute(query)
             session.commit()
 
-            logging.info(f"[update_image_tag_is_trained] Updated {len(ids_to_update)} entries successfully.")
+            logging.info(
+                f"[update_image_tag_is_trained] Updated {len(ids_to_update)} entries successfully."
+            )
         except Exception as e:
             logging.error(f"[update_image_tag_is_trained] Error updating entries: {e}")
             session.rollback()

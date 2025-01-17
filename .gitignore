@@ -170,3 +170,4 @@ cython_debug/
 .vscode
 /result*
 /static
+tes.py

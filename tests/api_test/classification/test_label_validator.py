@@ -40,7 +40,9 @@ async def test_validate_label_with_valid_image_id() -> None:
             "european": False,
         }
 
-        res = await client.patch(f"/api/v1/classification/validator/{image_id}", params=params, json=payload)
+        res = await client.patch(
+            f"/api/v1/classification/validator/{image_id}", params=params, json=payload
+        )
         assert res.status_code == 200
 
 
@@ -74,5 +76,7 @@ async def test_validate_label_with_invalid_image_id() -> None:
             "european": False,
         }
 
-        res = await client.patch(f"/api/v1/classification/validator/{image_id}", params=params, json=payload)
+        res = await client.patch(
+            f"/api/v1/classification/validator/{image_id}", params=params, json=payload
+        )
         assert res.status_code == 404

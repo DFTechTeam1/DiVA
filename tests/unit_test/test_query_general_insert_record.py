@@ -18,9 +18,15 @@ async def test_insert_record_with_single_data():
         await insert_record(
             db=db,
             table=CategoryDataDocumentation,
-            data={"unique_id": unique_id, "category": category, "description": description},
+            data={
+                "unique_id": unique_id,
+                "category": category,
+                "description": description,
+            },
         )
-        record = await find_record(db=db, table=CategoryDataDocumentation, fetch_type="all")
+        record = await find_record(
+            db=db, table=CategoryDataDocumentation, fetch_type="all"
+        )
         break
 
     assert record is not None
@@ -35,15 +41,29 @@ async def test_insert_record_with_single_data():
 async def test_insert_record_with_multi_data():
     faker = Faker()
     records_to_insert = [
-        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.name()},
-        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.name()},
-        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.name()},
+        {
+            "unique_id": str(uuid4()),
+            "category": faker.color_name(),
+            "description": faker.name(),
+        },
+        {
+            "unique_id": str(uuid4()),
+            "category": faker.color_name(),
+            "description": faker.name(),
+        },
+        {
+            "unique_id": str(uuid4()),
+            "category": faker.color_name(),
+            "description": faker.name(),
+        },
     ]
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
         for record in records_to_insert:
             await insert_record(db=db, table=CategoryDataDocumentation, data=record)
-        all_record = await find_record(db=db, table=CategoryDataDocumentation, fetch_type="all")
+        all_record = await find_record(
+            db=db, table=CategoryDataDocumentation, fetch_type="all"
+        )
         break
 
     assert all_record is not None
@@ -63,7 +83,11 @@ async def test_insert_record_by_forcing_not_null_table():
     async for db in get_db():
         with pytest.raises(DatabaseQueryError, match="Database query error."):
             await delete_record(db=db, table=CategoryDataDocumentation)
-            await insert_record(db=db, table=CategoryDataDocumentation, data={"unique_id": unique_id, "category": category})
+            await insert_record(
+                db=db,
+                table=CategoryDataDocumentation,
+                data={"unique_id": unique_id, "category": category},
+            )
 
 
 @pytest.mark.asyncio
@@ -77,9 +101,15 @@ async def test_insert_record_with_large_data():
         await insert_record(
             db=db,
             table=CategoryDataDocumentation,
-            data={"unique_id": unique_id, "category": category, "description": description},
+            data={
+                "unique_id": unique_id,
+                "category": category,
+                "description": description,
+            },
         )
-        record = await find_record(db=db, table=CategoryDataDocumentation, fetch_type="all")
+        record = await find_record(
+            db=db, table=CategoryDataDocumentation, fetch_type="all"
+        )
         break
 
     assert record is not None
@@ -94,14 +124,20 @@ async def test_insert_record_with_large_data():
 async def test_insert_record_raised_value_error():
     async for db in get_db():
         with pytest.raises(ValueError):
-            await insert_record(db=db, table=CategoryDataDocumentation, data={"invalid_column": "invalid_value"})
+            await insert_record(
+                db=db,
+                table=CategoryDataDocumentation,
+                data={"invalid_column": "invalid_value"},
+            )
 
 
 @pytest.mark.asyncio
 async def test_insert_record_raised_exception_error():
     async for db in get_db():
         with pytest.raises(DatabaseQueryError, match="Database query error."):
-            await insert_record(db=db, table=CategoryDataDocumentation, data={"unique_id": uuid4()})
+            await insert_record(
+                db=db, table=CategoryDataDocumentation, data={"unique_id": uuid4()}
+            )
 
 
 @pytest.mark.asyncio

@@ -12,8 +12,16 @@ from utils.query.general import find_record, delete_record, insert_record
 async def test_find_all_record_with_available_data():
     faker = Faker()
     records_to_insert = [
-        {"unique_id": str(uuid4()), "category": faker.century(), "description": faker.name()},
-        {"unique_id": str(uuid4()), "category": faker.color_name(), "description": faker.name()},
+        {
+            "unique_id": str(uuid4()),
+            "category": faker.century(),
+            "description": faker.name(),
+        },
+        {
+            "unique_id": str(uuid4()),
+            "category": faker.color_name(),
+            "description": faker.name(),
+        },
     ]
 
     async for db in get_db():
@@ -21,7 +29,9 @@ async def test_find_all_record_with_available_data():
         for record in records_to_insert:
             await insert_record(db=db, table=CategoryDataDocumentation, data=record)
 
-        records = await find_record(db=db, table=CategoryDataDocumentation, fetch_type="all")
+        records = await find_record(
+            db=db, table=CategoryDataDocumentation, fetch_type="all"
+        )
         break
 
     assert len(records) == len(records_to_insert)
@@ -36,7 +46,9 @@ async def test_find_all_record_with_available_data():
 async def test_find_all_record_with_empty_data():
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
-        record = await find_record(db=db, table=CategoryDataDocumentation, fetch_type="all")
+        record = await find_record(
+            db=db, table=CategoryDataDocumentation, fetch_type="all"
+        )
         break
 
     assert record is None
@@ -64,7 +76,11 @@ async def test_find_single_record_with_available_data():
         await insert_record(
             db=db,
             table=CategoryDataDocumentation,
-            data={"unique_id": unique_id, "category": random_category, "description": random_desc},
+            data={
+                "unique_id": unique_id,
+                "category": random_category,
+                "description": random_desc,
+            },
         )
 
         record = await find_record(db=db, table=CategoryDataDocumentation)
@@ -89,10 +105,16 @@ async def test_find_record_by_unique_id_with_available_data():
         await insert_record(
             db=db,
             table=CategoryDataDocumentation,
-            data={"unique_id": unique_id, "category": random_category, "description": random_desc},
+            data={
+                "unique_id": unique_id,
+                "category": random_category,
+                "description": random_desc,
+            },
         )
 
-        record = await find_record(db=db, table=CategoryDataDocumentation, unique_id=unique_id)
+        record = await find_record(
+            db=db, table=CategoryDataDocumentation, unique_id=unique_id
+        )
         break
 
     assert record is not None
@@ -107,7 +129,9 @@ async def test_find_record_by_unique_id_with_empty_data():
     unique_id = str(uuid4())
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
-        record = await find_record(db=db, table=CategoryDataDocumentation, unique_id=unique_id)
+        record = await find_record(
+            db=db, table=CategoryDataDocumentation, unique_id=unique_id
+        )
         break
 
     assert record is None
@@ -125,10 +149,16 @@ async def test_find_record_by_category_with_available_data():
         await insert_record(
             db=db,
             table=CategoryDataDocumentation,
-            data={"unique_id": unique_id, "category": random_category, "description": random_desc},
+            data={
+                "unique_id": unique_id,
+                "category": random_category,
+                "description": random_desc,
+            },
         )
 
-        record = await find_record(db=db, table=CategoryDataDocumentation, category=random_category)
+        record = await find_record(
+            db=db, table=CategoryDataDocumentation, category=random_category
+        )
         break
 
     assert record is not None
@@ -145,7 +175,9 @@ async def test_find_record_by_description_with_empty_data():
 
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
-        record = await find_record(db=db, table=CategoryDataDocumentation, description=random_desc)
+        record = await find_record(
+            db=db, table=CategoryDataDocumentation, description=random_desc
+        )
         break
 
     assert record is None
@@ -163,7 +195,11 @@ async def test_find_record_using_multiple_filter_with_available_data():
         await insert_record(
             db=db,
             table=CategoryDataDocumentation,
-            data={"unique_id": unique_id, "category": random_category, "description": random_desc},
+            data={
+                "unique_id": unique_id,
+                "category": random_category,
+                "description": random_desc,
+            },
         )
 
         record = await find_record(
@@ -193,7 +229,11 @@ async def test_find_record_using_multiple_filter_with_empty_data():
     async for db in get_db():
         await delete_record(db=db, table=CategoryDataDocumentation)
         record = await find_record(
-            db=db, table=CategoryDataDocumentation, category=random_category, unique_id=unique_id, description=random_desc
+            db=db,
+            table=CategoryDataDocumentation,
+            category=random_category,
+            unique_id=unique_id,
+            description=random_desc,
         )
         break
 
@@ -204,7 +244,9 @@ async def test_find_record_using_multiple_filter_with_empty_data():
 async def test_find_record_raised_value_error():
     async for db in get_db():
         with pytest.raises(ValueError):
-            await find_record(db=db, table=CategoryDataDocumentation, invalid_column="invalid_value")
+            await find_record(
+                db=db, table=CategoryDataDocumentation, invalid_column="invalid_value"
+            )
         break
 
 
@@ -213,5 +255,7 @@ async def test_find_record_raised_exception_error():
     unique_id = uuid4()
     async for db in get_db():
         with pytest.raises(DatabaseQueryError):
-            await find_record(db=db, table=CategoryDataDocumentation, unique_id=unique_id)
+            await find_record(
+                db=db, table=CategoryDataDocumentation, unique_id=unique_id
+            )
         break

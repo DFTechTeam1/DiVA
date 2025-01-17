@@ -12,8 +12,18 @@ from utils.query.labels_documentation import initialize_labels_documentation
 from utils.query.image_tag import initialize_image_tag_preparation
 from src.routers.enrich_knowledge import train_models
 from src.routers.monitor_task import monitor_task
-from src.routers.classification import pagination, labels_validator, documentation, images
-from src.routers.nas_directory_manager import create_directory, delete_directory, update_directory, move_directory
+from src.routers.classification import (
+    pagination,
+    labels_validator,
+    documentation,
+    images,
+)
+from src.routers.nas_directory_manager import (
+    create_directory,
+    delete_directory,
+    update_directory,
+    move_directory,
+)
 
 
 config = Config()
@@ -49,7 +59,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(middleware_class=SessionMiddleware, secret_key=config.MIDDLEWARE_SECRET_KEY)
+app.add_middleware(
+    middleware_class=SessionMiddleware, secret_key=config.MIDDLEWARE_SECRET_KEY
+)
 
 app.include_router(health_check.router)
 app.include_router(create_directory.router)

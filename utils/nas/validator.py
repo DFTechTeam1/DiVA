@@ -28,9 +28,13 @@ class BaseValidator:
     @staticmethod
     def is_unique(**kwargs: Any) -> NasIntegrationError:
         for name, elements in kwargs.items():
-            duplicates = [item for item, count in Counter(elements).items() if count > 1]
+            duplicates = [
+                item for item, count in Counter(elements).items() if count > 1
+            ]
             if duplicates:
-                raise NasIntegrationError(f"{name} should be unique. Duplicated entries: {duplicates}.")
+                raise NasIntegrationError(
+                    f"{name} should be unique. Duplicated entries: {duplicates}."
+                )
 
     @staticmethod
     def is_started_with_slash(**kwargs: Any) -> NasIntegrationError:
@@ -38,7 +42,9 @@ class BaseValidator:
             if isinstance(value, list):
                 for entry in value:
                     if not entry.startswith("/"):
-                        raise NasIntegrationError(f"{name} should start with '/': {entry}.")
+                        raise NasIntegrationError(
+                            f"{name} should start with '/': {entry}."
+                        )
             else:
                 if not value.startswith("/"):
                     raise NasIntegrationError(f"{name} should start with '/': {value}.")
@@ -58,67 +64,116 @@ class BaseValidator:
 
 class PayloadValidator(BaseValidator):
     @staticmethod
-    def create_directory(shared_folder: list | str, target_folder: list | str) -> NasIntegrationError:
-        PayloadValidator.is_filled(shared_folder=shared_folder, target_folder=target_folder)
-        PayloadValidator.is_same_datatype(shared_folder=shared_folder, target_folder=target_folder)
+    def shared_folder(
+        actual_shared_folder: list, target_shared_folder: list | str
+    ) -> None:
+        available_paths = {entry["path"] for entry in actual_shared_folder}
+
+        if isinstance(target_shared_folder, list):
+            not_found_shared_dir = [
+                target
+                for target in target_shared_folder
+                if target not in available_paths
+            ]
+            if not_found_shared_dir:
+                raise DataNotFoundError(
+                    f"Shared folder {not_found_shared_dir} not found."
+                )
+
+        if isinstance(target_shared_folder, str):
+            if target_shared_folder not in available_paths:
+                raise DataNotFoundError(
+                    f"Shared folder '{target_shared_folder}' not found."
+                )
+
+    @staticmethod
+    def create_directory(
+        shared_folder: list | str, target_folder: list | str
+    ) -> NasIntegrationError:
+        PayloadValidator.is_filled(
+            shared_folder=shared_folder, target_folder=target_folder
+        )
+        PayloadValidator.is_same_datatype(
+            shared_folder=shared_folder, target_folder=target_folder
+        )
         PayloadValidator.is_started_with_slash(shared_folder=shared_folder)
 
         if isinstance(target_folder, list):
             PayloadValidator.is_unique(target_folder=target_folder)
 
         if isinstance(shared_folder, list) and isinstance(target_folder, list):
-            PayloadValidator.is_length_equal(shared_folder=shared_folder, target_folder=target_folder)
+            PayloadValidator.is_length_equal(
+                shared_folder=shared_folder, target_folder=target_folder
+            )
 
 
-# class PathFormatter:
-#     pass
+class PathFormatter:
+    @staticmethod
+    def merge_path(shared_folder: list | str, target_folder: list | str) -> list:
+        if isinstance(shared_folder, list):
+            for entry in shared_folder:
+                if not entry.startswith("/"):
+                    raise NasIntegrationError(
+                        f"Shared folder should start with '/': {entry}."
+                    )
+            return [
+                entry + "/" + target_folder[idx]
+                for idx, entry in enumerate(shared_folder)
+            ]
+
+        if isinstance(shared_folder, str):
+            if not shared_folder.startswith("/"):
+                raise NasIntegrationError(
+                    f"Shared folder should start with '/': {shared_folder}."
+                )
+            return [shared_folder + "/" + target_folder]
+
+    @staticmethod
+    def revoke_path(path: list) -> tuple[list, list]:
+        """
+        Changed into default structures.
+
+        input = ['/apitesting/sub1/sub2']
+        output_shared_dir = ['/apitesting']
+        output_target_dir = ['sub1/sub2']
+        """
+        shared_dir = []
+        target_dir = []
+
+        for entry in path:
+            parts = entry.strip("/").split("/", 1)
+            shared_dir.append(f"/{parts[0]}")
+            target_dir.append(parts[1] if len(parts) > 1 else "")
+
+        return (shared_dir, target_dir)
+
+    pass
 
 
 def path_formatter(shared_folder: list | str, target_folder: list | str) -> list:
-    """Ensure shared folder is filled."""
-    if not shared_folder:
-        raise NasIntegrationError("Shared folder cannot be empty.")
-
-    """Ensure target folder is filled."""
-    if not target_folder:
-        raise NasIntegrationError("Target folder cannot be empty.")
-
-    """Ensure shared folder and target folder in same data type."""
-    if (isinstance(shared_folder, list) and isinstance(target_folder, str)) or (
-        isinstance(shared_folder, str) and isinstance(target_folder, list)
-    ):
-        raise NasIntegrationError(
-            f"Shared folder and target folder should be of the same data type, "
-            f"shared folder {type(shared_folder)}, target folder {type(target_folder)}."
-        )
-    """Ensure length of shared folder and target folder are equal."""
-    if isinstance(shared_folder, list) and isinstance(target_folder, list):
-        if len(shared_folder) != len(target_folder):
-            raise NasIntegrationError(
-                f"Shared folder and target folder length should be equal, "
-                f"shared folder: {len(shared_folder)}, target folder: {len(target_folder)}."
-            )
-
-        """Ensure target_folder has unique elements"""
-        duplicates = [item for item, count in Counter(target_folder).items() if count > 1]
-        if duplicates:
-            raise NasIntegrationError(f"Target folder contains duplicate entries: {duplicates}.")
-
     """Handle formatter in list data type."""
     if isinstance(shared_folder, list):
         for entry in shared_folder:
             if not entry.startswith("/"):
-                raise NasIntegrationError(f"Shared folder should start with '/': {entry}.")
-        return [entry + "/" + target_folder[idx] for idx, entry in enumerate(shared_folder)]
+                raise NasIntegrationError(
+                    f"Shared folder should start with '/': {entry}."
+                )
+        return [
+            entry + "/" + target_folder[idx] for idx, entry in enumerate(shared_folder)
+        ]
 
     """Handle formatter in string data type."""
     if isinstance(shared_folder, str):
         if not shared_folder.startswith("/"):
-            raise NasIntegrationError(f"Shared folder should start with '/': {shared_folder}.")
+            raise NasIntegrationError(
+                f"Shared folder should start with '/': {shared_folder}."
+            )
         return [shared_folder + "/" + target_folder]
 
 
-def validate_update_dir_path(target_folder: list | str, changed_name_into: list | str) -> None:
+def validate_update_dir_path(
+    target_folder: list | str, changed_name_into: list | str
+) -> None:
     """Ensure shared folder is filled."""
     if not target_folder:
         raise NasIntegrationError("Shared folder cannot be empty.")
@@ -144,25 +199,39 @@ def validate_update_dir_path(target_folder: list | str, changed_name_into: list 
             )
 
         """Ensure target_folder has unique elements"""
-        duplicates = [item for item, count in Counter(target_folder).items() if count > 1]
+        duplicates = [
+            item for item, count in Counter(target_folder).items() if count > 1
+        ]
         if duplicates:
-            raise NasIntegrationError(f"Target folder contains duplicate entries: {duplicates}.")
+            raise NasIntegrationError(
+                f"Target folder contains duplicate entries: {duplicates}."
+            )
     if isinstance(target_folder, str):
         if not target_folder.startswith("/"):
-            raise NasIntegrationError(f"Target folder should start with '/': {target_folder}.")
+            raise NasIntegrationError(
+                f"Target folder should start with '/': {target_folder}."
+            )
     return None
 
 
-def validate_shared_folder(shared_folder: list, target_shared_folder: list[str] | str) -> None:
+def validate_shared_folder(
+    shared_folder: list, target_shared_folder: list[str] | str
+) -> None:
     available_paths = {entry["path"] for entry in shared_folder}
 
     """Ensure all target shared folder startwith '/' in list data type."""
     if isinstance(target_shared_folder, list):
-        invalid_list = [target for target in target_shared_folder if not target.startswith("/")]
+        invalid_list = [
+            target for target in target_shared_folder if not target.startswith("/")
+        ]
         if invalid_list:
-            raise NasIntegrationError(f"Target shared folder should be started with '/', target shared folder: {invalid_list}")
+            raise NasIntegrationError(
+                f"Target shared folder should be started with '/', target shared folder: {invalid_list}"
+            )
 
-        not_found_shared_dir = [target for target in target_shared_folder if target not in available_paths]
+        not_found_shared_dir = [
+            target for target in target_shared_folder if target not in available_paths
+        ]
         if not_found_shared_dir:
             raise DataNotFoundError(f"Shared folder {not_found_shared_dir} not found.")
 
@@ -174,7 +243,9 @@ def validate_shared_folder(shared_folder: list, target_shared_folder: list[str] 
             )
 
         if target_shared_folder not in available_paths:
-            raise DataNotFoundError(f"Shared folder '{target_shared_folder}' not found.")
+            raise DataNotFoundError(
+                f"Shared folder '{target_shared_folder}' not found."
+            )
     return None
 
 
@@ -210,9 +281,13 @@ def refactor_path(target_folder: list, folder_name: list) -> list:
     return [f"{base}/{new}" for base, new in zip(base_paths, folder_name)]
 
 
-def validate_and_update_dir_path(target_path: list, target_rename_path: list, new_dir: list):
+def validate_and_update_dir_path(
+    target_path: list, target_rename_path: list, new_dir: list
+):
     if len(target_path) != len(target_rename_path):
-        raise ValueError("target_path and target_rename_path must have the same length.")
+        raise ValueError(
+            "target_path and target_rename_path must have the same length."
+        )
 
     output_target_path = []
     output_rename = []

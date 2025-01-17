@@ -23,7 +23,9 @@ async def get_image(relative_path: str):
             ext = relative_path.split(".")[-1]
 
             response = StreamingResponse(
-                content=buf, media_type=f"image/{ext}", headers={"Content-Disposition": f'inline; filename="{file_path.name}"'}
+                content=buf,
+                media_type=f"image/{ext}",
+                headers={"Content-Disposition": f'inline; filename="{file_path.name}"'},
             )
     except DiVA:
         raise

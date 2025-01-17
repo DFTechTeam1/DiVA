@@ -15,26 +15,34 @@ async def update_nas_directory(schema: NasMoveDirectory) -> ResponseDefault:
     logging.info("Endpoint Update NAS Directory.")
     response = ResponseDefault()
 
-    validate_update_dir_path(target_folder=schema.target_folder, changed_name_into=schema.dest_folder_path)
+    validate_update_dir_path(
+        target_folder=schema.target_folder, changed_name_into=schema.dest_folder_path
+    )
 
     sid = await auth_nas(ip_address=schema.ip_address)
 
     target_folder_new_dir, target_folder_existing_dir = await validate_directory(
         ip_address=schema.ip_address,
-        directory_path=[schema.target_folder] if type(schema.target_folder) is str else schema.target_folder,
+        directory_path=[schema.target_folder]
+        if type(schema.target_folder) is str
+        else schema.target_folder,
         sid=sid,
     )
 
     dest_folder_new_dir, dest_folder_existing_dir = await validate_directory(
         ip_address=schema.ip_address,
-        directory_path=[schema.dest_folder_path] if type(schema.dest_folder_path) is str else schema.dest_folder_path,
+        directory_path=[schema.dest_folder_path]
+        if type(schema.dest_folder_path) is str
+        else schema.dest_folder_path,
         sid=sid,
     )
 
     try:
         if target_folder_existing_dir:
             if dest_folder_new_dir:
-                response.message = "Destination folder should be existing directory on NAS."
+                response.message = (
+                    "Destination folder should be existing directory on NAS."
+                )
                 response.data = DirectoryStatus(non_existing_folder=dest_folder_new_dir)
             else:
                 await move_nas_dir(
@@ -45,7 +53,9 @@ async def update_nas_directory(schema: NasMoveDirectory) -> ResponseDefault:
                 )
 
                 response.message = "Directory successfully moved."
-                response.data = DirectoryStatus(folder_already_exsist=target_folder_existing_dir)
+                response.data = DirectoryStatus(
+                    folder_already_exsist=target_folder_existing_dir
+                )
         else:
             response.message = "Target folder should be existing directory on NAS."
             response.data = DirectoryStatus(non_existing_folder=target_folder_new_dir)

@@ -19,7 +19,12 @@ async def auth_nas(
     port = port_matcher(ip_address=ip_address)
     NAS_BASE_URL = f"http://{ip_address}:{port}/webapi/auth.cgi"
 
-    params = {"api": "SYNO.API.Auth", "version": 3 if auth_type == "login" else 1, "method": auth_type, "session": "FileStation"}
+    params = {
+        "api": "SYNO.API.Auth",
+        "version": 3 if auth_type == "login" else 1,
+        "method": auth_type,
+        "session": "FileStation",
+    }
 
     if auth_type == "login":
         params.update(
@@ -38,7 +43,9 @@ async def auth_nas(
             data = response.json()
 
             if not data["success"]:
-                logging.error(f"{auth_type.capitalize()} failed, please ensure request is appropriate.")
+                logging.error(
+                    f"{auth_type.capitalize()} failed, please ensure request is appropriate."
+                )
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
@@ -56,7 +63,9 @@ async def auth_nas(
     return None
 
 
-async def validate_directory(ip_address: str, directory_path: list, sid: str) -> tuple[Optional[list], Optional[list]]:
+async def validate_directory(
+    ip_address: str, directory_path: list, sid: str
+) -> tuple[Optional[list], Optional[list]]:
     port = port_matcher(ip_address=ip_address)
     NAS_BASE_URL = f"http://{ip_address}:{port}/webapi/auth.cgi"
     directory_already_exist = []
@@ -66,7 +75,13 @@ async def validate_directory(ip_address: str, directory_path: list, sid: str) ->
         try:
             for path in directory_path:
                 logging.info(f"Validating path {path}.")
-                params = {"api": "SYNO.FileStation.List", "version": 2, "method": "list", "folder_path": path, "_sid": sid}
+                params = {
+                    "api": "SYNO.FileStation.List",
+                    "version": 2,
+                    "method": "list",
+                    "folder_path": path,
+                    "_sid": sid,
+                }
 
                 response = await client.get(NAS_BASE_URL, params=params)
                 response.raise_for_status()
@@ -87,11 +102,19 @@ async def validate_directory(ip_address: str, directory_path: list, sid: str) ->
         finally:
             await client.aclose()
 
-    return (new_directory if new_directory else None, directory_already_exist if directory_already_exist else None)
+    return (
+        new_directory if new_directory else None,
+        directory_already_exist if directory_already_exist else None,
+    )
 
 
 async def extract_shared_folder(ip_address: str, sid: str) -> Optional[list]:
-    params = {"api": "SYNO.FileStation.List", "version": 2, "method": "list_share", "_sid": sid}
+    params = {
+        "api": "SYNO.FileStation.List",
+        "version": 2,
+        "method": "list_share",
+        "_sid": sid,
+    }
 
     port = port_matcher(ip_address=ip_address)
 
@@ -105,7 +128,9 @@ async def extract_shared_folder(ip_address: str, sid: str) -> Optional[list]:
             data = response.json()
 
             if not data["success"]:
-                logging.error("Checking shared folder failed, please ensure request are appropriate.")
+                logging.error(
+                    "Checking shared folder failed, please ensure request are appropriate."
+                )
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
@@ -115,7 +140,9 @@ async def extract_shared_folder(ip_address: str, sid: str) -> Optional[list]:
         except DataNotFoundError:
             raise
         except Exception as e:
-            logging.error(f"[check_shared_folder_already_exist] Cannot initialize NAS connection: {e}")
+            logging.error(
+                f"[check_shared_folder_already_exist] Cannot initialize NAS connection: {e}"
+            )
         finally:
             await client.aclose()
     return None
@@ -147,7 +174,9 @@ async def create_nas_dir(
             data = response.json()
 
             if not data.get("success"):
-                logging.error("Creating new NAS directory failed, please ensure request are appropriate.")
+                logging.error(
+                    "Creating new NAS directory failed, please ensure request are appropriate."
+                )
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
@@ -184,7 +213,9 @@ async def delete_nas_dir(
             data = response.json()
 
             if not data.get("success"):
-                logging.error("Deleting existing NAS directory failed, please ensure request are appropriate.")
+                logging.error(
+                    "Deleting existing NAS directory failed, please ensure request are appropriate."
+                )
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
@@ -223,7 +254,9 @@ async def update_nas_dir(
             data = response.json()
 
             if not data.get("success"):
-                logging.error("Updating existing NAS directory failed, please ensure request are appropriate.")
+                logging.error(
+                    "Updating existing NAS directory failed, please ensure request are appropriate."
+                )
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
@@ -263,7 +296,9 @@ async def move_nas_dir(
             data = response.json()
 
             if not data.get("success"):
-                logging.error("Moving existing NAS directory failed, please ensure request are appropriate.")
+                logging.error(
+                    "Moving existing NAS directory failed, please ensure request are appropriate."
+                )
                 error_detail = data.get("error", {})
                 raise NasIntegrationError(detail=error_detail)
 
@@ -276,10 +311,18 @@ async def move_nas_dir(
     return None
 
 
-async def list_existing_directory(ip_address: str, directory_path: str, sid: str) -> Optional[list]:
+async def list_existing_directory(
+    ip_address: str, directory_path: str, sid: str
+) -> Optional[list]:
     port = port_matcher(ip_address=ip_address)
     NAS_BASE_URL = f"http://{ip_address}:{port}/webapi/auth.cgi"
-    params = {"api": "SYNO.FileStation.List", "version": 2, "method": "list", "folder_path": directory_path, "_sid": sid}
+    params = {
+        "api": "SYNO.FileStation.List",
+        "version": 2,
+        "method": "list",
+        "folder_path": directory_path,
+        "_sid": sid,
+    }
 
     async with httpx.AsyncClient() as client:
         try:
@@ -305,7 +348,9 @@ async def list_folder(ip_address: str, directory_path: str) -> dict:
     """Used as api testing"""
     try:
         sid = await auth_nas(ip_address=ip_address)
-        existing_dir = await list_existing_directory(ip_address=ip_address, directory_path=directory_path, sid=sid)
+        existing_dir = await list_existing_directory(
+            ip_address=ip_address, directory_path=directory_path, sid=sid
+        )
     finally:
         await auth_nas(ip_address=ip_address)
     return existing_dir
