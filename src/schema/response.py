@@ -8,7 +8,7 @@ class Pagination(BaseModel):
 
 
 class DirectoryStatus(BaseModel):
-    folder_already_exsist: Optional[list] = None
+    folder_already_exist: Optional[list] = None
     non_existing_folder: Optional[list] = None
 
 

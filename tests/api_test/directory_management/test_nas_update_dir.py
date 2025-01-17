@@ -26,7 +26,7 @@ async def test_update_nas_single_dir_with_valid_payload_using_string() -> None:
         assert res.status_code == 200
         assert response["message"] == "Directory renamed successfully."
         assert len(response["data"]["non_existing_folder"]) == 1
-        assert response["data"]["folder_already_exsist"] is None
+        assert response["data"]["folder_already_exist"] is None
 
 
 @pytest.mark.asyncio
@@ -49,7 +49,7 @@ async def test_update_nas_single_dir_with_valid_payload_using_array() -> None:
         assert res.status_code == 200
         assert response["message"] == "Directory renamed successfully."
         assert len(response["data"]["non_existing_folder"]) == 1
-        assert response["data"]["folder_already_exsist"] is None
+        assert response["data"]["folder_already_exist"] is None
 
 
 @pytest.mark.asyncio
@@ -79,7 +79,7 @@ async def test_update_nas_multi_dir_with_valid_payload_using_array() -> None:
         assert len(response["data"]["non_existing_folder"]) == len(
             payload["changed_name_into"]
         )
-        assert response["data"]["folder_already_exsist"] is None
+        assert response["data"]["folder_already_exist"] is None
 
 
 @pytest.mark.asyncio
@@ -114,7 +114,7 @@ async def test_update_nas_multi_dir_with_mix_directory_using_array() -> None:
         print(response)
         assert res.status_code == 200
         assert response["message"] == "Directory renamed successfully."
-        assert len(response["data"]["folder_already_exsist"]) == 1
+        assert len(response["data"]["folder_already_exist"]) == 1
         assert len(response["data"]["non_existing_folder"]) == 2
 
 
@@ -139,7 +139,7 @@ async def test_update_nas_single_dir_with_change_name_into_directory_already_exi
         assert res.status_code == 200
         assert response["message"] == "All target folder already exist."
         assert response["data"]["non_existing_folder"] is None
-        assert len(response["data"]["folder_already_exsist"]) == 1
+        assert len(response["data"]["folder_already_exist"]) == 1
 
 
 @pytest.mark.asyncio

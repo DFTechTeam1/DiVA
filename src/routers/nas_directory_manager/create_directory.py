@@ -24,7 +24,7 @@ async def create_nas_directory_endpoint(
     validator.create_directory(
         shared_folder=schema.shared_folder, target_folder=schema.target_folder
     )
-    formated_path = formatter.merge_path(
+    formatted_path = formatter.merge_path(
         shared_folder=schema.shared_folder, target_folder=schema.target_folder
     )
 
@@ -32,12 +32,12 @@ async def create_nas_directory_endpoint(
         sid = await auth_nas(ip_address=schema.ip_address)
 
         new_dir, existing_dir = await validate_directory(
-            ip_address=schema.ip_address, directory_path=formated_path, sid=sid
+            ip_address=schema.ip_address, directory_path=formatted_path, sid=sid
         )
 
         if not new_dir:
             response.message = "Directory already exist."
-            response.data = DirectoryStatus(folder_already_exsist=existing_dir)
+            response.data = DirectoryStatus(folder_already_exist=existing_dir)
             return response
 
         shared_folder = await extract_shared_folder(
@@ -60,7 +60,7 @@ async def create_nas_directory_endpoint(
 
         response.message = "Directory created successfully."
         response.data = DirectoryStatus(
-            folder_already_exsist=existing_dir, non_existing_folder=new_dir
+            folder_already_exist=existing_dir, non_existing_folder=new_dir
         )
     except DiVA:
         raise

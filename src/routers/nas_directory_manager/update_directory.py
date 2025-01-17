@@ -57,7 +57,7 @@ async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
             """Response given when target of updated dir already exist on NAS"""
             response.message = "All target folder already exist."
             response.data = DirectoryStatus(
-                folder_already_exsist=updated_dir_already_exist,
+                folder_already_exist=updated_dir_already_exist,
                 non_existing_folder=new_updated_dir,
             )
             return response
@@ -83,7 +83,7 @@ async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
         """Response given when at least 1 valid data (valid target_folder and changed_name_into its not an existing folder in NAS)"""
         response.message = "Directory renamed successfully."
         response.data = DirectoryStatus(
-            folder_already_exsist=updated_dir_already_exist,
+            folder_already_exist=updated_dir_already_exist,
             non_existing_folder=new_updated_dir,
         )
 

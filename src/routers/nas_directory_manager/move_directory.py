@@ -53,7 +53,7 @@ async def update_nas_directory(schema: NasMoveDirectory) -> ResponseDefault:
 
                 response.message = "Directory successfully moved."
                 response.data = DirectoryStatus(
-                    folder_already_exsist=target_folder_existing_dir
+                    folder_already_exist=target_folder_existing_dir
                 )
         else:
             response.message = "Target folder should be existing directory on NAS."

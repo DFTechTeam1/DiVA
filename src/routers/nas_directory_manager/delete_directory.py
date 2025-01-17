@@ -42,7 +42,7 @@ async def delete_nas_directory_endpoint(schema: NasDeleteDirectory) -> ResponseD
 
         response.message = "Directory successfully removed."
         response.data = DirectoryStatus(
-            non_existing_folder=new_dir, folder_already_exsist=existing_dir
+            non_existing_folder=new_dir, folder_already_exist=existing_dir
         )
     except DiVA:
         raise

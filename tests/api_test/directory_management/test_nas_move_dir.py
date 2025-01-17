@@ -30,7 +30,7 @@ async def test_move_nas_single_dir_with_valid_payload_using_string() -> None:
         response = res.json()
         assert res.status_code == 200
         assert response["message"] == "Directory successfully moved."
-        assert len(response["data"]["folder_already_exsist"]) == 1
+        assert len(response["data"]["folder_already_exist"]) == 1
         assert response["data"]["non_existing_folder"] is None
 
 
@@ -56,7 +56,7 @@ async def test_move_nas_multi_dir_with_valid_payload_using_array() -> None:
         print(response)
         assert res.status_code == 200
         assert response["message"] == "Directory successfully moved."
-        assert len(response["data"]["folder_already_exsist"]) == len(
+        assert len(response["data"]["folder_already_exist"]) == len(
             payload["target_folder"]
         )
         assert response["data"]["non_existing_folder"] is None
@@ -71,30 +71,8 @@ async def test_move_nas_multi_dir_with_mix_existing_and_non_existing_nas_dir() -
     payload = {
         "ip_address": config.NAS_IP_5,
         "target_folder": [
-            existing_dir[
-                randint(
-                    0,
-                    len(
-                        await list_folder(
-                            ip_address=config.NAS_IP_5,
-                            directory_path="/nas_testing/api_testing",
-                        )
-                    )
-                    - 1,
-                )
-            ]["path"],
-            existing_dir[
-                randint(
-                    0,
-                    len(
-                        await list_folder(
-                            ip_address=config.NAS_IP_5,
-                            directory_path="/nas_testing/api_testing",
-                        )
-                    )
-                    - 1,
-                )
-            ]["path"],
+            existing_dir[-1]["path"],
+            existing_dir[-2]["path"],
             f"/nas_testing/api_testing/{str(uuid4())}",
         ],
         "dest_folder_path": [destination, destination, destination],
@@ -105,7 +83,7 @@ async def test_move_nas_multi_dir_with_mix_existing_and_non_existing_nas_dir() -
         response = res.json()
         assert res.status_code == 200
         assert response["message"] == "Directory successfully moved."
-        assert len(response["data"]["folder_already_exsist"]) == 2
+        assert len(response["data"]["folder_already_exist"]) == 2
         assert response["data"]["non_existing_folder"] is None
 
 
@@ -125,7 +103,7 @@ async def test_move_nas_non_existing_directory_on_nas() -> None:
         assert (
             response["message"] == "Target folder should be existing directory on NAS."
         )
-        assert response["data"]["folder_already_exsist"] is None
+        assert response["data"]["folder_already_exist"] is None
         assert len(response["data"]["non_existing_folder"]) == 1
 
 
@@ -165,7 +143,7 @@ async def test_move_nas_non_with_invalid_destination_folder_path_params() -> Non
             response["message"]
             == "Destination folder should be existing directory on NAS."
         )
-        assert response["data"]["folder_already_exsist"] is None
+        assert response["data"]["folder_already_exist"] is None
         assert len(response["data"]["non_existing_folder"]) == 1
 
 

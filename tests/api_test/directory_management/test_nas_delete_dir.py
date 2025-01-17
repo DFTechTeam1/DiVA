@@ -25,7 +25,7 @@ async def test_delete_nas_single_dir_with_valid_payload_using_string() -> None:
         response = res.json()
         assert res.status_code == 200
         assert response["message"] == "Directory successfully removed."
-        assert len(response["data"]["folder_already_exsist"]) == 1
+        assert len(response["data"]["folder_already_exist"]) == 1
         assert response["data"]["non_existing_folder"] is None
 
 
@@ -52,7 +52,7 @@ async def test_delete_nas_multi_dir_with_valid_payload_using_array() -> None:
         print(response)
         assert res.status_code == 200
         assert response["message"] == "Directory successfully removed."
-        assert len(response["data"]["folder_already_exsist"]) == len(
+        assert len(response["data"]["folder_already_exist"]) == len(
             payload["target_folder"]
         )
         assert response["data"]["non_existing_folder"] is None
@@ -79,7 +79,7 @@ async def test_delete_nas_multi_dir_with_non_existing_folder_on_nas() -> None:
         assert len(response["data"]["non_existing_folder"]) == len(
             payload["target_folder"]
         )
-        assert response["data"]["folder_already_exsist"] is None
+        assert response["data"]["folder_already_exist"] is None
 
 
 @pytest.mark.asyncio
@@ -108,7 +108,7 @@ async def test_delete_nas_multi_dir_with_directory_already_exist_and_new_directo
         assert res.status_code == 200
         assert response["message"] == "Directory successfully removed."
         assert len(response["data"]["non_existing_folder"]) == 1
-        assert len(response["data"]["folder_already_exsist"]) == 2
+        assert len(response["data"]["folder_already_exist"]) == 2
 
 
 @pytest.mark.asyncio
@@ -128,7 +128,7 @@ async def test_delete_nas_single_dir_with_invalid_target_folder_params_using_arr
         print(response)
         assert res.status_code == 200
         assert response["message"] == "Input should be existing directory on NAS."
-        assert response["data"]["folder_already_exsist"] is None
+        assert response["data"]["folder_already_exist"] is None
         assert len(response["data"]["non_existing_folder"]) == 1
 
 
@@ -150,7 +150,7 @@ async def test_delete_nas_single_dir_with_invalid_target_folder_params_using_str
         assert res.status_code == 200
         assert response["message"] == "Input should be existing directory on NAS."
         assert len(response["data"]["non_existing_folder"]) == 1
-        assert response["data"]["folder_already_exsist"] is None
+        assert response["data"]["folder_already_exist"] is None
 
 
 @pytest.mark.asyncio
@@ -173,5 +173,5 @@ async def test_delete_nas_multi_dir_with_invalid_shared_folder_params_using_arra
         print(response)
         assert res.status_code == 200
         assert response["message"] == "Input should be existing directory on NAS."
-        assert response["data"]["folder_already_exsist"] is None
+        assert response["data"]["folder_already_exist"] is None
         assert len(response["data"]["non_existing_folder"]) == 2

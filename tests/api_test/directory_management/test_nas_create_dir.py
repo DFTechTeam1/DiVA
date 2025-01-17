@@ -70,7 +70,7 @@ async def test_create_nas_single_directory_already_exist_in_nas():
         res = await client.post("/api/v1/nas/create-dir", json=payload)
         response = res.json()
         assert res.status_code == 200
-        assert len(response["data"]["folder_already_exsist"]) == 1
+        assert len(response["data"]["folder_already_exist"]) == 1
 
 
 @pytest.mark.asyncio
@@ -89,7 +89,7 @@ async def test_create_nas_multi_directory_all_already_exist_in_nas():
         res = await client.post("/api/v1/nas/create-dir", json=payload)
         response = res.json()
         assert res.status_code == 200
-        assert len(response["data"]["folder_already_exsist"]) == len(
+        assert len(response["data"]["folder_already_exist"]) == len(
             payload["target_folder"]
         )
         assert response["data"]["non_existing_folder"] is None
@@ -111,7 +111,7 @@ async def test_create_nas_multi_directory_mix_of_new_and_dir_already_exist_on_na
         res = await client.post("/api/v1/nas/create-dir", json=payload)
         response = res.json()
         assert res.status_code == 200
-        assert len(response["data"]["folder_already_exsist"]) == 2
+        assert len(response["data"]["folder_already_exist"]) == 2
         assert len(response["data"]["non_existing_folder"]) == 1
 
 
