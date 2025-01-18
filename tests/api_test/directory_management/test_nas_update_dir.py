@@ -2,9 +2,10 @@ import pytest
 import httpx
 from src.secret import Config
 from utils.nas.external import list_folder
-from uuid import uuid4
+from faker import Faker
 
 config = Config()
+faker = Faker()
 
 
 @pytest.mark.asyncio
@@ -18,7 +19,7 @@ async def test_update_nas_single_dir_with_valid_payload_using_string() -> None:
     payload = {
         "ip_address": config.NAS_IP_5,
         "target_folder": existing_dir[0]["path"],
-        "changed_name_into": f"{str(uuid4())}",
+        "changed_name_into": f"{faker.name()}",
     }
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/update-dir", json=payload)
@@ -41,7 +42,7 @@ async def test_update_nas_single_dir_with_valid_payload_using_array() -> None:
     payload = {
         "ip_address": config.NAS_IP_5,
         "target_folder": [random_path],
-        "changed_name_into": [f"{str(uuid4())}"],
+        "changed_name_into": [f"{faker.name()}"],
     }
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/update-dir", json=payload)
@@ -69,7 +70,7 @@ async def test_update_nas_multi_dir_with_valid_payload_using_array() -> None:
             existing_dir[0]["path"],
             existing_dir[1]["path"],
         ],
-        "changed_name_into": [f"{str(uuid4())}", f"{str(uuid4())}"],
+        "changed_name_into": [f"{faker.name()}", f"{faker.name()}"],
     }
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/update-dir", json=payload)
@@ -86,7 +87,7 @@ async def test_update_nas_multi_dir_with_valid_payload_using_array() -> None:
 async def test_update_nas_multi_dir_with_mix_directory_using_array() -> None:
     """
     Should update multi directory from array 0-9 and 10-19 on /nas_testing/api_testing
-    and update them using str(uuid4()), but skip the update in the last data
+    and update them using faker.name(), but skip the update in the last data
     due to targeting an existing dir
     """
 
@@ -102,8 +103,8 @@ async def test_update_nas_multi_dir_with_mix_directory_using_array() -> None:
             existing_dir[2]["path"],
         ],
         "changed_name_into": [
-            f"{str(uuid4())}",
-            f"{str(uuid4())}",
+            f"{faker.name()}",
+            f"{faker.name()}",
             "4662f3c4-4adc-4736-842d-36b7a55067f3",
         ],
     }

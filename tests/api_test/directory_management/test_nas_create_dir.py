@@ -1,9 +1,10 @@
 import pytest
 import httpx
-from uuid import uuid4
+from faker import Faker
 from src.secret import Config
 
 config = Config()
+faker = Faker()
 
 
 @pytest.mark.asyncio
@@ -12,7 +13,7 @@ async def test_create_nas_single_dir_with_valid_payload_using_string() -> None:
     payload = {
         "ip_address": config.NAS_IP_5,
         "shared_folder": "/nas_testing",
-        "target_folder": f"api_testing/{str(uuid4())}",
+        "target_folder": f"api_testing/{faker.name()}",
     }
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/create-dir", json=payload)
@@ -27,7 +28,7 @@ async def test_create_nas_single_dir_with_valid_payload_using_array() -> None:
     payload = {
         "ip_address": config.NAS_IP_5,
         "shared_folder": ["/nas_testing"],
-        "target_folder": [f"api_testing/{str(uuid4())}"],
+        "target_folder": [f"api_testing/{faker.name()}"],
     }
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/create-dir", json=payload)
@@ -43,9 +44,9 @@ async def test_create_nas_multi_dir_with_valid_payload() -> None:
         "ip_address": config.NAS_IP_5,
         "shared_folder": ["/nas_testing", "/nas_testing", "/nas_testing"],
         "target_folder": [
-            f"api_testing/{str(uuid4())}",
-            f"api_testing/{str(uuid4())}",
-            f"api_testing/{str(uuid4())}",
+            f"api_testing/{faker.name()}",
+            f"api_testing/{faker.name()}",
+            f"api_testing/{faker.name()}",
         ],
     }
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
@@ -102,7 +103,7 @@ async def test_create_nas_multi_directory_mix_of_new_and_dir_already_exist_on_na
         "ip_address": config.NAS_IP_5,
         "shared_folder": ["/nas_testing", "/nas_testing", "/nas_testing"],
         "target_folder": [
-            f"api_testing/{str(uuid4())}",
+            f"api_testing/{faker.name()}",
             "existing_dir/already_exist1",
             "existing_dir/already_exist2",
         ],
@@ -121,7 +122,7 @@ async def test_create_nas_with_invalid_shared_folder_params_using_array():
     payload = {
         "ip_address": config.NAS_IP_5,
         "shared_folder": ["nas_testing"],
-        "target_folder": [f"api_testing/{str(uuid4())}"],
+        "target_folder": [f"api_testing/{faker.name()}"],
     }
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/create-dir", json=payload)
@@ -134,7 +135,7 @@ async def test_create_nas_with_invalid_shared_folder_params_using_string():
     payload = {
         "ip_address": config.NAS_IP_5,
         "shared_folder": "nas_testing",
-        "target_folder": f"api_testing/{str(uuid4())}",
+        "target_folder": f"api_testing/{faker.name()}",
     }
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/create-dir", json=payload)
@@ -147,7 +148,7 @@ async def test_create_nas_with_invalid_shared_folder_and_target_folder_params():
     payload = {
         "ip_address": config.NAS_IP_5,
         "shared_folder": "nas_testing",
-        "target_folder": [f"api_testing/{str(uuid4())}"],
+        "target_folder": [f"api_testing/{faker.name()}"],
     }
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         res = await client.post("/api/v1/nas/create-dir", json=payload)

@@ -9,7 +9,6 @@ from utils.query.general import find_record
 from utils.custom_error import (
     AccessUnauthorized,
     ServiceError,
-    DatabaseQueryError,
     DiVA,
 )
 from services.postgres.models import (
@@ -84,8 +83,6 @@ async def labels_documentation(
         response.message = "No documentation found."
 
     except DiVA:
-        raise
-    except DatabaseQueryError:
         raise
     except Exception as e:
         raise ServiceError(detail=f"Service error: {e}.", name="DiVA")

@@ -11,9 +11,7 @@ from src.schema.response import (
 router = APIRouter(tags=["Task Monitor"])
 
 
-async def monitor_task(
-    task_id: UUID,
-) -> ResponseDefault:
+async def monitor_task(task_id: UUID) -> ResponseDefault:
     logging.info("Endpoint Monitor Task")
     response = ResponseDefault()
     task_state = TaskResultState()

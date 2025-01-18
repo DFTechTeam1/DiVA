@@ -10,7 +10,6 @@ from services.postgres.models import ImageTag
 from utils.custom_error import (
     AccessUnauthorized,
     ServiceError,
-    DatabaseQueryError,
     DataNotFoundError,
     DiVA,
 )
@@ -75,8 +74,6 @@ async def labels_validator(
         response.message = f"Entry {image_id} validated."
 
     except DiVA:
-        raise
-    except DatabaseQueryError:
         raise
     except Exception as e:
         raise ServiceError(detail=f"Service error: {e}.", name="DiVA")

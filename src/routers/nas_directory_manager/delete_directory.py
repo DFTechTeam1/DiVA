@@ -46,8 +46,6 @@ async def delete_nas_directory_endpoint(schema: NasDeleteDirectory) -> ResponseD
         )
     except DiVA:
         raise
-    except ValueError:
-        raise
     except Exception as e:
         logging.error(f"Error delete NAS directory: {e}")
         raise ServiceError(detail="Failed to delete directory into NAS.", name="DiVA")
