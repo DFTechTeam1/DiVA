@@ -1,12 +1,14 @@
-from utils.logger import logging
+from src.secret import Config
 from urllib.parse import quote
-from fastapi import APIRouter, status, Request, Query
+from utils.logger import logging
 from src.schema.response import ResponseDefault
-from src.schema.request_format import AllowedIpAddress
 from utils.custom_error import AccessUnauthorized
-from utils.query.pagination import extract_distributed_entries
 from utils.custom_error import ServiceError, DiVA
+from fastapi import APIRouter, status, Request, Query
+from src.schema.request_format import AllowedIpAddress
+from utils.query.pagination import extract_distributed_entries
 
+config = Config()
 router = APIRouter(tags=["Classification"], prefix="/classification")
 
 
@@ -44,7 +46,7 @@ async def labels_distribution(
                 "/home/dfactory/Project/utils/diva/client_preview/", "", 1
             )
             image["filepath"] = (
-                f"http://localhost:8000/api/v1/images/{quote(relative_path)}"
+                f"http://{config.SERVER_HOST}:8000/api/v1/images/{quote(relative_path)}"
             )
 
         response.message = "Retrieved labels distribution."

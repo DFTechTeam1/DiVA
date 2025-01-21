@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # Default value
-HOST="127.0.0.1"
 ENV_FILE="env/.env.development"
 
 # Checking for existing processes on port 8000
@@ -33,26 +32,13 @@ case "$1" in
   --development)
     echo "Using development environment configuration"
     ENV_FILE="env/.env.development"
-    HOST="127.0.0.1"
     ;;
   --staging)
     echo "Using staging environment configuration"
     ENV_FILE="env/.env.staging"
-    CURRENT_IP=$(hostname -I | awk '{print $1}')
-    if [ -z "$CURRENT_IP" ]; then
-      echo "Unable to detect current IP address! Using default host"
-    else
-      HOST="$CURRENT_IP"
-    fi
     ;;
   --production)
     echo "Using production environment configuration"
-    CURRENT_IP=$(hostname -I | awk '{print $1}')
-    if [ -z "$CURRENT_IP" ]; then
-      echo "Unable to detect current IP address! Using default host"
-    else
-      HOST="$CURRENT_IP"
-    fi
     ENV_FILE="env/.env.production"
     ;;
   *)
@@ -62,13 +48,18 @@ case "$1" in
     ;;
 esac
 
-#Load the environment variables using the external script
+# Load the environment variables
 export $(grep -v '^#' $ENV_FILE | xargs)
-sh ./scripts/load_env.sh
+
+# Check if SERVER_HOST is defined in the .env file
+if [ -z "$SERVER_HOST" ]; then
+  echo "SERVER_HOST is not defined in $ENV_FILE. Using default '127.0.0.1'."
+  SERVER_HOST="127.0.0.1"
+fi
 
 # Activate virtualenv
 sh ./scripts/activate.sh
 
 # Start the server
-echo "Running uvicorn server in debug mode"
-uvicorn src.main:app --host "$HOST" --port 8000 --reload --log-level debug
+echo "Running uvicorn server with SERVER_HOST=$SERVER_HOST"
+uvicorn src.main:app --host "$SERVER_HOST" --port 8000 --reload --log-level debug

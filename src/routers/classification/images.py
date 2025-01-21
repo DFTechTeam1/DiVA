@@ -1,7 +1,7 @@
 import io
 from pathlib import Path
-from fastapi.responses import StreamingResponse
 from fastapi import APIRouter, status
+from fastapi.responses import StreamingResponse
 from utils.custom_error import ServiceError, DataNotFoundError, DiVA
 
 router = APIRouter(tags=["Images"], prefix="/images")
