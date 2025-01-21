@@ -1,5 +1,5 @@
-from uuid import UUID
 from utils.logger import logging
+from uuid import UUID
 from celery.result import AsyncResult
 from fastapi import APIRouter, status
 from services.celery.worker import app
@@ -11,9 +11,7 @@ from src.schema.response import (
 router = APIRouter(tags=["Task Monitor"])
 
 
-async def monitor_task(
-    task_id: UUID,
-) -> ResponseDefault:
+async def monitor_task(task_id: UUID) -> ResponseDefault:
     logging.info("Endpoint Monitor Task")
     response = ResponseDefault()
     task_state = TaskResultState()

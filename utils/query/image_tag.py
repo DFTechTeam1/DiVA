@@ -4,10 +4,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.schema.request_format import AllowedIpAddress
 from utils.helper import find_image_path, extract_filename
-from utils.custom_errors import DatabaseQueryError, DataNotFoundError
+from utils.custom_error import DatabaseQueryError, DataNotFoundError
 from services.postgres.models import ImageTag
 from services.postgres.connection import database_connection
-from utils.query.labels_documentation import validate_data_availability
+from services.postgres.connection import get_db
+from utils.query.general import find_record
 
 
 async def insert_image_tag_entry(
@@ -61,12 +62,17 @@ async def insert_image_tag_entry(
             await session.close()
 
 
-async def initialize_image_tag_preparation():
-    is_available = await validate_data_availability(table_model=ImageTag)
-    if not is_available:
+async def initialize_image_tag_preparation() -> None:
+    async for db in get_db():
+        image_tag_record = await find_record(db=db, table=ImageTag)
+        break
+    if not image_tag_record:
         filepaths = find_image_path()
         filenames = extract_filename(filepaths=filepaths)
         await insert_image_tag_entry(filepaths=filepaths, filenames=filenames)
+    else:
+        logging.info("Image tag already initialized")
+    return None
 
 
 def extract_image_tag_entries(

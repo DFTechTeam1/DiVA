@@ -9,10 +9,10 @@ from petname import generate
 from datetime import datetime
 from torch.optim import Adam
 from utils.logger import logging
-from torch.utils.data import DataLoader
 from torch.nn import BCEWithLogitsLoss
-from utils.query.model_accuracy import insert_test_accuracy
+from torch.utils.data import DataLoader
 from utils.helper import label_distribution
+from utils.query.model_accuracy import insert_test_accuracy
 from utils.resnet.custom_model import CustomDataLoader, CustomResNet50Classifier
 from utils.query.image_tag import extract_image_tag_entries, update_image_tag_is_trained
 from utils.query.model_card import (

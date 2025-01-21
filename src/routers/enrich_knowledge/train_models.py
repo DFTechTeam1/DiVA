@@ -15,7 +15,7 @@ async def labels_documentation() -> ResponseDefault:
     response = ResponseDefault()
     task_state = TaskResultState()
 
-    response.message = "Initiate model development task."
+    logging.info("Initiate model development task.")
     task = train_finetune_custom_resnet50.delay()
 
     task_state.task_id = task.id

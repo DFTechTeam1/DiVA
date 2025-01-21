@@ -1,9 +1,9 @@
+from utils.logger import logging
 from services.postgres.connection import database_connection
 from services.postgres.models import ImageTag
 from sqlalchemy import select, func
 from sqlalchemy.sql import and_
-from utils.logger import logging
-from utils.custom_errors import DataNotFoundError, DatabaseQueryError
+from utils.custom_error import DataNotFoundError, DatabaseQueryError
 from src.schema.response import Pagination
 
 
@@ -21,10 +21,8 @@ async def extract_distributed_entries(
             query = (
                 select(ImageTag)
                 .where(
-                    and_(
-                        ImageTag.ip_address == ip_address,
-                        ImageTag.is_validated == is_validated,
-                    )
+                    ImageTag.ip_address == ip_address,
+                    ImageTag.is_validated == is_validated,
                 )
                 .limit(image_per_page)
                 .offset(skip_entry[0])
@@ -49,9 +47,6 @@ async def extract_distributed_entries(
             result = await session.execute(query)
             rows = result.fetchall()
             result = [dict(row._mapping) for row in rows]
-
-            if not result:
-                result = None
 
             response.available_page = total_page
             response.images = result

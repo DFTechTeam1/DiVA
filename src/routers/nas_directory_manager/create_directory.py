@@ -1,48 +1,74 @@
-import os
 from utils.logger import logging
 from fastapi import APIRouter, status
-from src.schema.response import ResponseDefault
+from src.schema.response import ResponseDefault, DirectoryStatus
 from src.schema.request_format import NasDirectoryManagement
-from utils.nas.path_extractor import (
-    login_nas,
-    logout_nas,
-    check_shared_folder_already_exist,
+from utils.custom_error import ServiceError, DiVA
+from utils.nas.validator import PayloadValidator, PathFormatter
+from utils.nas.external import (
+    auth_nas,
     create_nas_dir,
+    extract_shared_folder,
+    validate_directory,
 )
 
 router = APIRouter(tags=["Directory Management"])
 
 
-async def create_nas_directory(schema: NasDirectoryManagement) -> ResponseDefault:
-    logging.info("Endpoint Create NAS Directory.")
+async def create_nas_directory_endpoint(
+    schema: NasDirectoryManagement,
+) -> ResponseDefault:
     response = ResponseDefault()
+    validator = PayloadValidator()
+    formatter = PathFormatter()
 
-    BASE_PATH = f"{schema.ip_address}{schema.folder_path}"
-    message = f"Created new directory in {BASE_PATH}"
-
-    if isinstance(schema.folder_path, list) and len(schema.folder_path) > 1:
-        common_path = os.path.commonpath(schema.folder_path)
-        message = f"Created multiple directory on {schema.ip_address}{common_path}"
-    if isinstance(schema.folder_path, list) and len(schema.folder_path) == 1:
-        common_path = os.path.commonpath(schema.folder_path)
-        message = f"Created a directory in {schema.ip_address}{common_path}"
-
-    conn_id = await login_nas(ip_address=schema.ip_address)
-
-    await check_shared_folder_already_exist(
-        connection_id=conn_id,
-        ip_address=schema.ip_address,
-        folder_path=schema.folder_path,
+    validator.create_directory(
+        shared_folder=schema.shared_folder, target_folder=schema.target_folder
     )
-    await create_nas_dir(
-        connection_id=conn_id,
-        ip_address=schema.ip_address,
-        folder_path=schema.folder_path,
-        directory_name=schema.directory_name,
+    formatted_path = formatter.merge_path(
+        shared_folder=schema.shared_folder, target_folder=schema.target_folder
     )
-    await logout_nas(ip_address=schema.ip_address)
 
-    response.message = message
+    try:
+        sid = await auth_nas(ip_address=schema.ip_address)
+
+        new_dir, existing_dir = await validate_directory(
+            ip_address=schema.ip_address, directory_path=formatted_path, sid=sid
+        )
+
+        if not new_dir:
+            response.message = "Directory already exist."
+            response.data = DirectoryStatus(folder_already_exist=existing_dir)
+            return response
+
+        shared_folder = await extract_shared_folder(
+            ip_address=schema.ip_address, sid=sid
+        )
+        validator.shared_folder(
+            actual_shared_folder=shared_folder,
+            target_shared_folder=schema.shared_folder,
+        )
+
+        shared_folder, target_folder = formatter.revoke_path(path=new_dir)
+
+        logging.info("Endpoint create directory NAS.")
+        await create_nas_dir(
+            ip_address=schema.ip_address,
+            shared_folder=shared_folder,
+            target_folder=target_folder,
+            sid=sid,
+        )
+
+        response.message = "Directory created successfully."
+        response.data = DirectoryStatus(
+            folder_already_exist=existing_dir, non_existing_folder=new_dir
+        )
+    except DiVA:
+        raise
+    except Exception as e:
+        logging.error(f"Error create NAS directory: {e}")
+        raise ServiceError(detail="Failed to create directory into NAS.", name="DiVA")
+    finally:
+        await auth_nas(ip_address=schema.ip_address, auth_type="logout")
 
     return response
 
@@ -50,7 +76,7 @@ async def create_nas_directory(schema: NasDirectoryManagement) -> ResponseDefaul
 router.add_api_route(
     methods=["POST"],
     path="/nas/create-dir",
-    endpoint=create_nas_directory,
+    endpoint=create_nas_directory_endpoint,
     summary="Create new directory on NAS.",
     status_code=status.HTTP_200_OK,
     response_model=ResponseDefault,

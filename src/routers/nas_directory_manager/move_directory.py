@@ -1,56 +1,70 @@
-import os
 from utils.logger import logging
 from fastapi import APIRouter, status
-from src.schema.response import ResponseDefault
+from utils.nas.validator import PayloadValidator
+from utils.custom_error import ServiceError, DiVA
 from src.schema.request_format import NasMoveDirectory
-from utils.nas.path_extractor import (
-    login_nas,
-    logout_nas,
-    check_shared_folder_already_exist,
-    move_nas_dir,
-)
+from src.schema.response import ResponseDefault, DirectoryStatus
+from utils.nas.external import auth_nas, validate_directory, move_nas_dir
 
 router = APIRouter(tags=["Directory Management"])
 
 
 async def update_nas_directory(schema: NasMoveDirectory) -> ResponseDefault:
-    logging.info("Endpoint Update NAS Directory.")
     response = ResponseDefault()
+    validator = PayloadValidator()
 
-    if isinstance(schema.path, list):
-        if len(schema.path) > 1:
-            from_path = os.path.commonpath(schema.path)
-            target_path = os.path.commonpath(schema.dest_folder_path)
-            response.message = f"Moved multiple directories from {schema.ip_address}{from_path} into {schema.ip_address}{target_path}"
-        elif len(schema.path) == 1:
-            old_path = schema.path[0]
-            response.message = f"Moved a directory from {schema.ip_address}{old_path} into {schema.ip_address}{schema.dest_folder_path[0]}"
+    validator.move_directory(
+        target_folder=schema.target_folder, destination_path=schema.dest_folder_path
+    )
+
+    try:
+        sid = await auth_nas(ip_address=schema.ip_address)
+
+        target_folder_new_dir, target_folder_existing_dir = await validate_directory(
+            ip_address=schema.ip_address,
+            directory_path=[schema.target_folder]
+            if type(schema.target_folder) is str
+            else schema.target_folder,
+            sid=sid,
+        )
+
+        dest_folder_new_dir, dest_folder_existing_dir = await validate_directory(
+            ip_address=schema.ip_address,
+            directory_path=[schema.dest_folder_path]
+            if type(schema.dest_folder_path) is str
+            else schema.dest_folder_path,
+            sid=sid,
+        )
+
+        if target_folder_existing_dir:
+            if dest_folder_new_dir:
+                response.message = (
+                    "Destination folder should be existing directory on NAS."
+                )
+                response.data = DirectoryStatus(non_existing_folder=dest_folder_new_dir)
+            else:
+                logging.info("Endpoint move directory NAS.")
+                await move_nas_dir(
+                    ip_address=schema.ip_address,
+                    target_folder=target_folder_existing_dir,
+                    dest_folder_path=dest_folder_existing_dir,
+                    sid=sid,
+                )
+
+                response.message = "Directory successfully moved."
+                response.data = DirectoryStatus(
+                    folder_already_exist=target_folder_existing_dir
+                )
         else:
-            response.success = False
-            response.message = "No folder paths provided."
-    elif isinstance(schema.path, str):
-        old_path = schema.path
-        response.message = f"Moved a directory from {schema.ip_address}{old_path} into {schema.ip_address}{schema.dest_folder_path}"
-    else:
-        response.success = False
-        response.message = "Invalid folder_path format."
-
-    conn_id = await login_nas(ip_address=schema.ip_address)
-
-    await check_shared_folder_already_exist(
-        connection_id=conn_id,
-        ip_address=schema.ip_address,
-        folder_path=schema.path,
-    )
-
-    await move_nas_dir(
-        connection_id=conn_id,
-        ip_address=schema.ip_address,
-        folder_path=schema.path,
-        dest_folder_path=schema.dest_folder_path,
-    )
-
-    await logout_nas(ip_address=schema.ip_address)
+            response.message = "Target folder should be existing directory on NAS."
+            response.data = DirectoryStatus(non_existing_folder=target_folder_new_dir)
+    except DiVA:
+        raise
+    except Exception as e:
+        logging.error(f"Error move NAS directory: {e}")
+        raise ServiceError(detail="Failed to move NAS directory.", name="DiVA")
+    finally:
+        await auth_nas(ip_address=schema.ip_address, auth_type="logout")
 
     return response
 

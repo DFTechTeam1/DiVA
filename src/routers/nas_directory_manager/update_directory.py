@@ -1,61 +1,99 @@
-import os
 from utils.logger import logging
 from fastapi import APIRouter, status
-from src.schema.response import ResponseDefault
-from src.schema.request_format import NasDirectoryManagement
-from utils.nas.path_extractor import (
-    login_nas,
-    logout_nas,
-    check_shared_folder_already_exist,
+from utils.custom_error import ServiceError, DiVA
+from src.schema.request_format import NasUpdateDirectory
+from src.schema.response import ResponseDefault, DirectoryStatus
+from utils.nas.validator import PathFormatter, PayloadValidator
+from utils.nas.external import (
+    auth_nas,
+    validate_directory,
     update_nas_dir,
 )
+
 
 router = APIRouter(tags=["Directory Management"])
 
 
-async def update_nas_directory(schema: NasDirectoryManagement) -> ResponseDefault:
-    logging.info("Endpoint Update NAS Directory.")
+async def update_nas_directory(schema: NasUpdateDirectory) -> ResponseDefault:
     response = ResponseDefault()
+    validator = PayloadValidator()
+    formatter = PathFormatter()
 
-    if isinstance(schema.folder_path, list):
-        if len(schema.folder_path) > 1:
-            common_path = os.path.commonpath(schema.folder_path)
-            response.message = (
-                f"Updated multiple directories on {schema.ip_address}{common_path}"
-            )
-        elif len(schema.folder_path) == 1:
-            old_path = schema.folder_path[0]
-            new_path = (
-                f"{'/'.join(old_path.split('/')[:-1])}/{schema.directory_name[0]}"
-            )
-            response.message = f"Updated a directory from {schema.ip_address}{old_path} into {schema.ip_address}{new_path}"
-        else:
-            response.success = False
-            response.message = "No folder paths provided."
-    elif isinstance(schema.folder_path, str):
-        old_path = schema.folder_path
-        new_path = f"{'/'.join(old_path.split('/')[:-1])}/{schema.directory_name}"
-        response.message = f"Updated a directory from {schema.ip_address}{old_path} into {schema.ip_address}{new_path}"
-    else:
-        response.success = False
-        response.message = "Invalid folder_path format."
-
-    conn_id = await login_nas(ip_address=schema.ip_address)
-
-    await check_shared_folder_already_exist(
-        connection_id=conn_id,
-        ip_address=schema.ip_address,
-        folder_path=schema.folder_path,
+    validator.update_directory(
+        target_folder=schema.target_folder, changed_name_into=schema.changed_name_into
     )
 
-    await update_nas_dir(
-        connection_id=conn_id,
-        ip_address=schema.ip_address,
-        folder_path=schema.folder_path,
-        changed_dir_into=schema.directory_name,
-    )
+    try:
+        sid = await auth_nas(ip_address=schema.ip_address)
 
-    await logout_nas(ip_address=schema.ip_address)
+        new_dir, existing_dir = await validate_directory(
+            ip_address=schema.ip_address,
+            directory_path=[schema.target_folder]
+            if type(schema.target_folder) is str
+            else schema.target_folder,
+            sid=sid,
+        )
+
+        if not existing_dir:
+            """Response given when target folder is not exist on NAS."""
+            response.message = "Target folder should be existing directory on NAS."
+            response.data = DirectoryStatus(non_existing_folder=new_dir)
+            return response
+
+        refactored_path = formatter.refactor_path(
+            target_folder=existing_dir,
+            folder_name=[schema.changed_name_into]
+            if type(schema.changed_name_into) is str
+            else schema.changed_name_into,
+        )
+
+        new_updated_dir, updated_dir_already_exist = await validate_directory(
+            ip_address=schema.ip_address,
+            directory_path=refactored_path,
+            sid=sid,
+        )
+
+        if not new_updated_dir:
+            """Response given when target of updated dir already exist on NAS"""
+            response.message = "All target folder already exist."
+            response.data = DirectoryStatus(
+                folder_already_exist=updated_dir_already_exist,
+                non_existing_folder=new_updated_dir,
+            )
+            return response
+
+        output_target_path, output_rename = formatter.validate_and_update_dir_path(
+            new_dir=new_updated_dir,
+            target_path=[schema.target_folder]
+            if type(schema.target_folder) is str
+            else schema.target_folder,
+            target_rename_path=[schema.changed_name_into]
+            if type(schema.changed_name_into) is str
+            else schema.changed_name_into,
+        )
+
+        logging.info("Endpoint update NAS directory.")
+        await update_nas_dir(
+            ip_address=schema.ip_address,
+            target_folder=output_target_path,
+            changed_name_into=output_rename,
+            sid=sid,
+        )
+
+        """Response given when at least 1 valid data (valid target_folder and changed_name_into its not an existing folder in NAS)"""
+        response.message = "Directory renamed successfully."
+        response.data = DirectoryStatus(
+            folder_already_exist=updated_dir_already_exist,
+            non_existing_folder=new_updated_dir,
+        )
+
+    except DiVA:
+        raise
+    except Exception as e:
+        logging.error(f"Error update NAS directory: {e}")
+        raise ServiceError(detail="Failed to update directory into NAS.", name="DiVA")
+    finally:
+        await auth_nas(ip_address=schema.ip_address, auth_type="logout")
 
     return response
 
